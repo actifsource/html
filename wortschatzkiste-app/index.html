@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#163a30">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Wortschatzkiste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#E3F0E9; --surface:#FFFFFF; --ink:#15302A; --muted:#4F6B62; --line:#C4DACF;
+  --chalk:#FFC83D; --chalk-ink:#3A2A00;
+  --good:#1F8F5C; --bad:#D8414A;
+  --paper:#FFFFFF; --paper-ink:#1B2A26; --paper-line:#B7D2EC; --paper-red:#E2575C;
+  --b1:#E5484D; --b2:#F08C2E; --b3:#EDBE22; --b4:#86BD45; --b5:#1F8F5C;
+  --shadow: 0 2px 0 rgba(21,48,42,.18);
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#123229; --surface:#1B4236; --ink:#EAF4EF; --muted:#A3C3B7; --line:#2D5C4D;
+    --shadow: 0 2px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#123229; --surface:#1B4236; --ink:#EAF4EF; --muted:#A3C3B7; --line:#2D5C4D;
+  --shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Baloo 2","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  font-size:18px; line-height:1.4;
+  -webkit-tap-highlight-color: transparent;
+}
+#app{max-width:560px; margin:0 auto; padding:16px 16px 40px}
+h1{font-size:2rem; line-height:1.1; margin:.2em 0 .1em; font-weight:800; letter-spacing:-.01em}
+h2{font-size:1.25rem; margin:1.4em 0 .5em; font-weight:700}
+p{margin:.3em 0}
+.muted{color:var(--muted)}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, input:focus-visible, .group-row:focus-visible{outline:3px solid var(--chalk); outline-offset:2px}
+
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:.4em;
+  width:100%; min-height:56px; padding:10px 18px; border:0; border-radius:16px;
+  font-size:1.15rem; font-weight:700;
+  background:var(--chalk); color:var(--chalk-ink); box-shadow:var(--shadow);
+}
+.btn:active{transform:translateY(2px); box-shadow:none}
+.btn[disabled]{opacity:.45; transform:none}
+.btn.ghost{background:transparent; color:var(--ink); box-shadow:none; border:2px solid var(--line)}
+.btn.good{background:var(--good); color:#fff}
+.btn.bad{background:var(--bad); color:#fff}
+.btn.small{min-height:44px; width:auto; font-size:1rem; padding:6px 14px; border-radius:12px}
+
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px}
+.back{background:none; border:0; padding:8px 4px; font-size:1.05rem; font-weight:600; color:var(--muted); min-height:44px}
+.icon-btn{background:var(--surface); border:2px solid var(--line); border-radius:12px; min-width:44px; min-height:44px; font-size:1.1rem}
+
+.hero{padding:10px 0 14px}
+.hero .box-art{font-size:2.6rem; line-height:1}
+
+.list{display:flex; flex-direction:column; gap:10px; margin:14px 0 18px}
+.group-row{
+  display:block; width:100%; text-align:left; border:0;
+  background:var(--surface); border-radius:18px; padding:14px 16px 16px;
+  box-shadow:var(--shadow); border-left:8px solid var(--chalk);
+}
+.group-row .name{font-size:1.25rem; font-weight:700; display:block}
+.group-row .meta{color:var(--muted); font-size:.95rem}
+.boxbar{height:10px; border-radius:6px; overflow:hidden; margin-top:8px; background:var(--line)}
+.boxbar span{display:block; height:100%; background:var(--good)}
+
+.empty{background:var(--surface); border:2px dashed var(--line); border-radius:18px; padding:20px; text-align:center; margin:16px 0}
+
+.panel{background:var(--surface); border-radius:18px; padding:16px; box-shadow:var(--shadow); margin:12px 0}
+.seg{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:var(--bg); padding:5px; border-radius:14px; margin-bottom:14px}
+.seg button{border:0; background:transparent; border-radius:10px; min-height:44px; font-weight:700; font-size:1rem; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
+
+
+label.field{display:block; margin-bottom:10px}
+label.field span{display:block; font-weight:600; font-size:.95rem; color:var(--muted); margin-bottom:2px}
+input[type=text]{
+  width:100%; min-height:52px; padding:10px 14px; font:inherit; font-size:1.15rem;
+  border:2px solid var(--line); border-radius:14px; background:var(--bg); color:var(--ink);
+}
+.msg{min-height:1.4em; font-size:.95rem; font-weight:600; margin:4px 0 8px}
+.msg.ok{color:var(--good)} .msg.err{color:var(--bad)}
+
+.words{list-style:none; margin:0; padding:0}
+.words li button{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:none; border:0; border-bottom:2px solid var(--line); padding:12px 2px; min-height:52px;
+}
+.words li:last-child button{border-bottom:0}
+.words li button:disabled{color:inherit; cursor:default; opacity:1}
+
+.hero-top{display:flex; justify-content:space-between; align-items:flex-start}
+.hero-actions{display:flex; gap:10px}
+.backup-btn{min-width:52px; min-height:52px; font-size:1.5rem; border-radius:14px}
+
+/* Wasser-Weg */
+.pipes-wrap{background:#e8f2fb; border-radius:18px; padding:6px 4px 2px; box-shadow:var(--shadow)}
+#pipes{display:block; width:100%; height:auto; max-height:62vh; margin:0 auto; user-select:none; -webkit-user-select:none}
+#pipes path{fill:none; stroke-linecap:round; stroke-linejoin:round}
+#pipes .p-gap{stroke:#e8f2fb; stroke-width:26}
+#pipes .p-body{stroke:#8e9aa6; stroke-width:16}
+#pipes .p-shine{stroke:#c4ccd4; stroke-width:4; transform:translateX(-3px)}
+#pipes .water{stroke:#2f8ff0; stroke-width:9; stroke-dasharray:3000; stroke-dashoffset:3000}
+#pipes .tap{cursor:pointer; outline:none}
+#pipes .tap:focus-visible .tap-metal{stroke:#f2b400; stroke-width:3}
+#pipes .tap-metal{fill:#9aa5b0}
+#pipes .tap-red{fill:#e0444c}
+#pipes .tap-cap{fill:#fff; opacity:.85}
+#pipes .handle{transition:transform .5s}
+#pipes .tap.open .handle{transform:rotate(90deg)}
+#pipes .tap-num{font:800 12px "Baloo 2",system-ui,sans-serif; fill:#5b6b75; text-anchor:middle; opacity:0}
+#pipes.busy .tap:not(.open){opacity:.55}
+#pipes .b-box{fill:#fff; stroke:#8e9aa6; stroke-width:3}
+#pipes .b-fill{fill:#7cc0ff; transform:scaleY(0); transform-box:fill-box; transform-origin:bottom; transition:transform .5s}
+#pipes .basin.full .b-fill{transform:scaleY(.55)}
+#pipes .b-word{font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif; font-weight:800; fill:#1b2a26; text-anchor:middle; dominant-baseline:middle}
+#pipes .b-flower{font-size:30px; text-anchor:middle; opacity:0; transform-box:fill-box; transform-origin:bottom; transform:scale(.2); transition:opacity .3s, transform .5s cubic-bezier(.3,1.6,.5,1)}
+#pipes .basin.win .b-flower{opacity:1; transform:scale(1)}
+#pipes .basin.win .b-box{stroke:#1f8f5c; stroke-width:5}
+#pipes .b-mark{font:800 22px "Baloo 2",system-ui,sans-serif; fill:#d8414a; text-anchor:middle; opacity:0}
+#pipes .basin.lose .b-mark{opacity:1}
+#pipes .basin.lose .b-box{stroke:#d8414a; stroke-width:5}
+@media (prefers-reduced-motion: reduce){ #pipes .handle, #pipes .b-fill, #pipes .b-flower{transition:none} }
+
+/* Wort-Gipfel */
+.mini-card.compact{min-height:0; padding:6px 14px 8px; margin-bottom:10px; background:var(--paper); border-top:4px solid var(--paper-red)}
+.mini-card.compact .lang{height:26px; font-size:.85rem}
+.mini-card.compact .word{padding-top:4px; font-size:clamp(1.4rem, 7vw, 2rem)}
+.climb-wrap{border-radius:18px; overflow:hidden; box-shadow:var(--shadow); touch-action:none}
+#climb{display:block; width:100%; height:min(56vh, 430px); touch-action:none}
+.pad-ctrl{display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:10px; margin-top:10px; user-select:none; -webkit-user-select:none}
+.ctl{min-height:64px; border:0; border-radius:18px; background:var(--surface); color:var(--ink); font-size:1.8rem; font-weight:800; box-shadow:var(--shadow); touch-action:none; -webkit-touch-callout:none}
+.ctl.jump{background:var(--chalk); color:var(--chalk-ink); font-size:1.2rem}
+.ctl.down{transform:translateY(2px); box-shadow:none; filter:brightness(.93)}
+
+/* Bearbeiten */
+.group-tools{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0 4px}
+.group-tools .btn{width:100%; background:var(--surface)}
+.cards-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.cards-head h2{margin:0; display:flex; align-items:center; gap:8px}
+.cards-head .count{font-size:.95rem; background:var(--bg); border-radius:999px; padding:0 10px; color:var(--muted)}
+.cards-actions{display:flex; gap:6px}
+.icon-btn.act{min-width:48px; min-height:48px; font-size:1.35rem; border-radius:14px}
+.icon-btn.act[aria-pressed="true"]{border-color:var(--chalk); background:color-mix(in srgb, var(--chalk) 25%, var(--surface))}
+.add-form{display:flex; flex-direction:column; gap:8px; background:var(--bg); border-radius:14px; padding:10px; margin:8px 0 2px}
+.add-form input{background:var(--surface)}
+.edit-ico{font-size:1.05rem; opacity:.8}
+.photo-busy{display:flex; align-items:center; gap:12px; background:var(--bg); border-radius:14px; padding:12px; margin:8px 0}
+.photo-busy > span:nth-child(2){flex:1; line-height:1.3}
+.spin{font-size:1.8rem; animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.15)}}
+
+/* Stapel antippen */
+.stack.tappable{cursor:pointer; -webkit-tap-highlight-color:transparent}
+.stack.tappable:active .top-card{transform:translateY(4px) scale(.985)}
+.stack.tappable:focus-visible{outline:3px solid var(--chalk); outline-offset:6px; border-radius:12px}
+.tap-hint{text-align:center; margin-bottom:4px}
+.tap-hint span{display:inline-block; background:var(--chalk); color:var(--chalk-ink); font-weight:800; font-size:1.05rem; padding:6px 16px; border-radius:999px; box-shadow:0 2px 0 rgba(0,0,0,.15); animation:nudge 2.4s ease-in-out infinite}
+@keyframes nudge{0%,70%,100%{transform:scale(1)} 80%{transform:scale(1.07)} 90%{transform:scale(.98)}}
+@media (prefers-reduced-motion: reduce){ .tap-hint span{animation:none} }
+
+/* Stufen */
+.seg.levels{grid-template-columns:repeat(3,1fr); margin-bottom:6px}
+.seg.levels button{display:flex; flex-direction:column; align-items:center; gap:0; min-height:58px; line-height:1.1}
+.lv-icon{font-size:1.4rem}
+.level-desc{font-size:.9rem; color:var(--muted); margin:2px 2px 4px}
+.level-desc strong{color:var(--ink)}
+.medal-tiers{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; align-items:end; margin:8px 0 6px}
+.tier{background:var(--surface); border:3px solid transparent; border-radius:14px; padding:5px 2px 4px; text-align:center; box-shadow:var(--shadow); font:inherit; color:inherit; min-width:0; overflow:hidden; cursor:pointer}
+.tier[aria-pressed="true"]{border-color:var(--chalk); background:color-mix(in srgb, var(--chalk) 22%, var(--surface))}
+.tier[aria-pressed="false"] .tier-name{opacity:.75}
+.tier:active{transform:translateY(2px)}
+.tier-medals{display:flex; justify-content:center; line-height:1.1; white-space:nowrap}
+.tier.t0 .tier-medals{font-size:min(1.25rem, 5vw)}
+.tier.t1 .tier-medals{font-size:min(1.6rem, 6vw)}
+.tier.t2 .tier-medals{font-size:min(2rem, 7vw)}
+.tier-name{font-size:.8rem; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.row-awards .mini.t0{font-size:.85em} .row-awards .mini.t1{font-size:1.05em} .row-awards .mini.t2{font-size:1.3em}
+.new-award.big-tipp .icon{font-size:2.8rem}
+.new-award.big-profi .icon{font-size:3.4rem}
+
+/* Profi-Modus */
+.toggle{display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--bg); border:2px solid var(--line); border-radius:16px; padding:10px 12px; margin:0 0 14px; min-height:64px}
+.toggle[aria-checked="true"]{border-color:var(--chalk); background:color-mix(in srgb, var(--chalk) 18%, var(--surface))}
+.tg-icon{font-size:1.8rem; line-height:1}
+.tg-text{flex:1; display:flex; flex-direction:column; line-height:1.25}
+.tg-text strong{font-size:1.1rem}
+.tg-text span{font-size:.85rem; color:var(--muted)}
+.switch{width:52px; height:30px; border-radius:15px; background:var(--line); position:relative; flex:none; transition:background .2s}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s}
+.toggle[aria-checked="true"] .switch{background:var(--good)}
+.toggle[aria-checked="true"] .switch::after{transform:translateX(22px)}
+.task-type{font-weight:700; color:var(--muted); margin:-6px 0 10px; font-size:1rem}
+.mini-card{position:relative; padding:10px 16px 14px; margin-bottom:14px; min-height:150px; display:flex; flex-direction:column}
+.mini-card .lang{font-size:.95rem; font-weight:700; color:#6A7A75; height:36px; display:flex; align-items:center; gap:6px}
+.mini-card .word{flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:clamp(1.6rem, 8vw, 2.4rem); font-weight:800; line-height:1.15; overflow-wrap:anywhere; padding-top:10px}
+input.typed{font-size:1.4rem; min-height:60px; text-align:center; font-weight:700}
+input.typed.ok{border-color:var(--good); background:color-mix(in srgb, var(--good) 15%, var(--surface))}
+input.typed.no{border-color:var(--bad); background:color-mix(in srgb, var(--bad) 12%, var(--surface)); text-decoration:line-through}
+.verdict{border-radius:14px; padding:12px 16px; margin:12px 0; font-size:1.15rem; font-weight:700; text-align:center}
+.verdict.good{background:var(--good); color:#fff}
+.verdict.bad{background:color-mix(in srgb, var(--bad) 14%, var(--surface)); border:2px solid var(--bad)}
+.choices{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.choice{min-height:70px; border:2px solid var(--line); background:var(--surface); border-radius:16px; font-size:1.1rem; font-weight:700; padding:8px; box-shadow:var(--shadow); overflow-wrap:anywhere}
+.choice:active{transform:translateY(2px); box-shadow:none}
+.choice.right{background:var(--good); border-color:var(--good); color:#fff}
+.choice.wrong{background:var(--bad); border-color:var(--bad); color:#fff; animation:shake .35s}
+.choice:disabled{opacity:1}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.slots{display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin:6px 0 16px; min-height:52px}
+.slot{width:36px; height:46px; border-bottom:4px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800}
+.slot.filled{border-color:var(--chalk)}
+.gap{width:14px}
+.slots.ok .slot{border-color:var(--good); color:var(--good)}
+.slots.no{animation:shake .35s}
+.slots.no .slot{border-color:var(--bad); color:var(--bad)}
+.tiles{display:flex; flex-wrap:wrap; justify-content:center; gap:8px}
+.tile{width:48px; height:52px; border:0; border-radius:12px; background:var(--chalk); color:var(--chalk-ink); font-size:1.5rem; font-weight:800; box-shadow:var(--shadow)}
+.tile:disabled{opacity:.2; box-shadow:none}
+.pond{position:relative; height:300px; border-radius:22px; overflow:hidden;
+  background:radial-gradient(ellipse at 30% 20%, #7fd3e6 0%, #3aa7c9 45%, #1f7fa6 100%); box-shadow:inset 0 0 0 4px rgba(255,255,255,.25)}
+.ripple{position:absolute; border:2px solid rgba(255,255,255,.35); border-radius:50%; animation:ripple 4s infinite ease-out}
+.r1{width:60px; height:24px; left:12%; top:58%} .r2{width:80px; height:30px; right:10%; top:70%; animation-delay:2s}
+@keyframes ripple{from{transform:scale(.4); opacity:1} to{transform:scale(1.6); opacity:0}}
+.pad{position:absolute; width:31%; aspect-ratio:1.25; border:0; padding:6px; border-radius:50% 50% 50% 50% / 55% 55% 45% 45%;
+  background:radial-gradient(circle at 40% 35%, #8fdc6a, #4fae3b 70%, #3a8f2c); color:#14321a; font-weight:800; font-size:.95rem; line-height:1.1;
+  box-shadow:0 5px 0 rgba(0,0,0,.18); display:flex; align-items:center; justify-content:center; text-align:center; overflow-wrap:anywhere; transition:transform .4s, opacity .4s}
+.pad span{background:rgba(255,255,255,.82); border-radius:10px; padding:3px 6px; max-width:100%}
+.pad.p0{left:2%; top:9%} .pad.p1{left:34.5%; top:2%} .pad.p2{right:2%; top:11%}
+.pad.right{box-shadow:0 0 0 5px #fff, 0 0 22px 6px #ffe680}
+.pad.sink{transform:scale(.55) translateY(20px); opacity:.25}
+.pad:disabled{cursor:default}
+.start-pad{position:absolute; left:50%; bottom:14px; width:90px; height:52px; transform:translateX(-50%); border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, #8fdc6a, #4fae3b 70%, #3a8f2c); box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.frog{position:absolute; left:50%; bottom:28px; width:60px; margin-left:-30px; text-align:center; font-size:3rem; line-height:1; z-index:3; transition:opacity .3s}
+.frog.hop{animation:hop .6s cubic-bezier(.35,.1,.4,1) forwards}
+@keyframes hop{
+  0%{transform:translate(0,0) scale(1)}
+  15%{transform:translate(0,6px) scale(1.1,.85)}
+  55%{transform:translate(calc(var(--dx) * .55), calc(var(--dy) * .55 - 60px)) scale(1.35)}
+  100%{transform:translate(var(--dx), var(--dy)) scale(1)}}
+.frog.splash{opacity:0}
+.frog.happy{filter:drop-shadow(0 0 8px #fff7b0)}
+.splashfx{position:absolute; font-size:2.6rem; transform:translate(-50%,-50%); animation:splashfx .6s ease-out}
+@keyframes splashfx{from{transform:translate(-50%,-50%) scale(.3)} to{transform:translate(-50%,-50%) scale(1)}}
+.bonus{font-weight:800; color:var(--ink); background:color-mix(in srgb, var(--chalk) 35%, var(--surface)); display:inline-block; padding:4px 12px; border-radius:12px; margin-top:6px}
+@media (prefers-reduced-motion: reduce){ .ripple{animation:none; opacity:0} .frog.hop{animation-duration:.01s} }
+
+/* Liste einfügen */
+textarea{width:100%; min-height:180px; padding:10px 14px; font:inherit; font-size:1.05rem; line-height:1.35;
+  border:2px solid var(--line); border-radius:14px; background:var(--bg); color:var(--ink); resize:vertical}
+textarea.half{min-height:150px}
+.steps{margin:6px 0 14px; padding-left:1.3em; color:var(--muted)}
+.steps li{margin:3px 0}
+.phead, .prow{display:grid; grid-template-columns:1.6em 1fr 1fr 44px; gap:6px; align-items:center}
+.phead{font-weight:700; font-size:.9rem; color:var(--muted); margin-bottom:4px}
+.prow{margin-bottom:6px}
+.prow .pn{font-size:.85rem; color:var(--muted); text-align:right}
+.prow input{min-height:46px; font-size:1rem; padding:8px 10px; border-radius:10px; min-width:0}
+.prow input.missing{border-color:var(--bad)}
+.prow.dupe input{opacity:.5}
+.pmore{min-height:46px; border:2px solid var(--line); background:var(--surface); border-radius:10px; font-size:1.2rem; font-weight:800}
+.note{border-radius:12px; padding:10px 14px; margin:10px 0; font-weight:600; font-size:.95rem}
+.note.warn{background:color-mix(in srgb, var(--bad) 14%, var(--surface)); color:var(--ink); border:2px solid var(--bad)}
+.note.info{background:var(--bg); color:var(--ink)}
+.pbar{display:flex; gap:8px; margin:6px 0 12px}
+.pbar .btn{flex:1}
+
+/* Belohnungen */
+.awards{display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin:6px 0 4px; font-size:1.7rem; line-height:1.2}
+.awards .stars{font-size:1.2rem; font-weight:800; background:var(--surface); border-radius:12px; padding:4px 12px; box-shadow:var(--shadow)}
+.awards .medals, .awards .trophies{display:flex; gap:4px; align-items:center}
+.awards small{font-size:1rem; font-weight:800; margin-left:2px}
+.award-off{filter:grayscale(1); opacity:.28}
+.goal{font-size:.95rem; color:var(--muted); margin:2px 0}
+.row-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.row-awards{font-size:1.1rem; font-weight:700; white-space:nowrap}
+.stars-won{font-size:3.2rem; line-height:1; margin-bottom:6px}
+.stars-won span{display:inline-block; animation:pop .45s cubic-bezier(.3,1.6,.5,1) backwards}
+.stars-won span:nth-child(2){animation-delay:.15s}
+.stars-won span:nth-child(3){animation-delay:.3s}
+@keyframes pop{from{transform:scale(0) rotate(-30deg)}}
+.new-award{display:flex; align-items:center; gap:12px; background:var(--chalk); color:var(--chalk-ink); border-radius:16px; padding:12px 16px; font-weight:700; font-size:1.1rem; margin:10px 0; box-shadow:var(--shadow)}
+.new-award .icon{font-size:2.2rem; line-height:1}
+@media (prefers-reduced-motion: reduce){ .stars-won span{animation:none} }
+.words .en{font-weight:700}
+.words .de{color:var(--muted)}
+.words .pair{flex:1; min-width:0; overflow-wrap:anywhere}
+.dot{width:14px; height:14px; border-radius:50%; flex:none}
+
+/* Stapel */
+.stack{position:relative; width:100%; aspect-ratio:5 / 3.4; min-height:220px; margin:8px 0 34px}
+.paper{
+  border-radius:10px; color:var(--paper-ink);
+  background:
+    linear-gradient(var(--paper-red),var(--paper-red)) 0 46px / 100% 2px no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 33px, var(--paper-line) 33px 35px) 0 46px / 100% 100% no-repeat,
+    var(--paper);
+  box-shadow: 0 4px 0 rgba(0,0,0,.14), 0 10px 20px rgba(0,0,0,.10);
+}
+.under{position:absolute; inset:0}
+.under.u1{transform:translateY(12px) scale(.955); filter:brightness(.96)}
+.under.u2{transform:translateY(24px) scale(.91); filter:brightness(.91)}
+.top-card{position:absolute; inset:0; perspective:1200px}
+.top-card.away-near{animation:near .38s ease-in forwards}
+.top-card.away-far{animation:far .42s ease-in forwards}
+@keyframes near{to{transform:translateY(14px) scale(.95); opacity:0}}
+@keyframes far{to{transform:translateY(40px) scale(.86) rotate(-4deg); opacity:0}}
+.top-card.enter{animation:enter .25s ease-out}
+@keyframes enter{from{transform:translateY(12px) scale(.955)}}
+.card{position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.3,.7,.3,1)}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; padding:10px 16px 16px}
+.face.back{transform:rotateY(180deg)}
+.face .lang{font-size:.95rem; font-weight:700; color:#6A7A75; height:36px; display:flex; align-items:center; gap:6px}
+.face .word{flex:1; display:flex; align-items:center; justify-content:center; text-align:center;
+  font-size:clamp(1.8rem, 9vw, 2.8rem); font-weight:800; line-height:1.15; overflow-wrap:anywhere; padding:0 4px}
+.face .hint{font-size:.9rem; color:#6A7A75; text-align:center}
+.stack-info .word{font-size:clamp(1.6rem, 8vw, 2.4rem)}
+.speak{position:absolute; top:6px; right:8px; border:0; background:#EEF4FA; border-radius:10px; min-width:44px; min-height:40px; font-size:1.2rem; z-index:2}
+.progress{height:12px; background:var(--surface); border-radius:8px; overflow:hidden; margin:6px 0 18px}
+.progress span{display:block; height:100%; background:var(--chalk); transition:width .3s}
+.answers{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.sorted{min-height:56px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; color:var(--muted)}
+.sure{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-weight:600}
+.sure .bar{flex:1; height:12px; background:var(--bg); border-radius:8px; overflow:hidden}
+.sure .bar span{display:block; height:100%; background:var(--good)}
+.result{text-align:center; padding:20px 0}
+.result .big{font-size:3.4rem; line-height:1}
+.missed{text-align:left}
+
+/* Dialog */
+dialog{border:0; border-radius:20px; padding:20px; width:min(92vw, 440px); background:var(--surface); color:var(--ink)}
+dialog::backdrop{background:rgba(10,30,24,.55)}
+dialog h3{margin:0 0 12px; font-size:1.3rem}
+.dlg-actions{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+
+.banner{background:var(--bad); color:#fff; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:.95rem}
+
+@media (prefers-reduced-motion: reduce){ .card,.progress span{transition:none} .top-card{animation-duration:.01s !important} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+
+<script>
+(function(){
+"use strict";
+const KEY = "wortschatzkiste-v1";
+const ROUND_SIZE = 10;
+const app = document.getElementById("app");
+const dlg = document.getElementById("dlg");
+
+let storageOk = true;
+let S = load();
+let ui = { groupId: null, dir: "ende", session: null, result: null, flash: null, busy: false, editMode: false };
+
+function load(){
+  let d = null;
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) d = JSON.parse(raw);
+  }catch(e){ storageOk = false; }
+  if(!d || !Array.isArray(d.groups) || !Array.isArray(d.words)) d = { groups: [], words: [] };
+  return migrate(d);
+}
+function migrate(d){
+  // Umstellung von Version 1 (Fächer) auf Stapel
+  d.words.forEach(w => {
+    if(!w.level){
+      const b = w.box || { ende:1, deen:1 };
+      w.level = { ende: Math.max(0, b.ende - 1), deen: Math.max(0, b.deen - 1) };
+      delete w.box;
+    }
+  });
+  if(!d.settings) d.settings = {};
+  if(!d.settings.mode) d.settings.mode = d.settings.advanced ? "profi" : "normal";
+  delete d.settings.advanced;
+  d.groups.forEach(g => {
+    if(!Array.isArray(g.order)) g.order = [];
+    if(typeof g.stars !== "number") g.stars = 0;
+    if(!g.medals) g.medals = {};
+    if(g.medals.bronze !== undefined || g.medals.silver !== undefined || g.medals.gold !== undefined){
+      const old = g.medals; g.medals = { normal: { bronze: !!old.bronze, silver: !!old.silver, gold: !!old.gold } };
+    }
+  });
+  return d;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOk = true; }
+  catch(e){ storageOk = false; }
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function norm(s){ return s.trim().replace(/\s+/g," "); }
+
+function group(id){ return S.groups.find(g => g.id === id); }
+function wordsOf(id){ return S.words.filter(w => w.groupId === id); }
+function wordById(id){ return S.words.find(w => w.id === id); }
+function levelOf(w, dir){ return dir === "mix" ? Math.min(w.level.ende, w.level.deen) : w.level[dir]; }
+function dotColor(l){ return l <= 1 ? "var(--b1)" : l <= 3 ? "var(--b3)" : "var(--b5)"; }
+function bestLevel(w){ return Math.max(w.level.ende, w.level.deen); }
+function isSure(w){ return bestLevel(w) >= 3; }
+
+/* ---------- Belohnungen pro Gruppe ----------
+   Drei Stufen: Im Kopf (normal), Tippen, Profi. Jede Stufe hat eigene Medaillen,
+   je höher die Stufe, desto größer die Medaille und desto mehr Bonus-Sterne. */
+const MODES = [
+  { key:"normal", icon:"🧠", name:"Im Kopf", short:"Im Kopf", bonus:0, desc:"Karte umdrehen und selbst sagen, ob du es wusstest." },
+  { key:"tipp",   icon:"⌨️", name:"Tippen",  short:"Tippen",  bonus:1, desc:"Jede Übersetzung selbst eintippen. Groß- und Kleinschreibung zählt nicht. +1 Bonus-Stern." },
+  { key:"profi",  icon:"🚀", name:"Profi",   short:"Profi",   bonus:2, desc:"Eintippen, Antippen, Frosch-Sprung, Wort-Gipfel und Wasser-Weg, bunt gemischt. +2 Bonus-Sterne." }
+];
+function modeOf(k){ return MODES.find(m => m.key === k) || MODES[0]; }
+const MEDALS = [
+  { key:"bronze", icon:"🥉", name:"Bronze", goal:"die Hälfte der Karten 2-mal hintereinander wissen",
+    test: (ws, L) => ws.filter(w => L(w) >= 2).length >= ws.length / 2 },
+  { key:"silver", icon:"🥈", name:"Silber", goal:"alle Karten 3-mal hintereinander wissen",
+    test: (ws, L) => ws.every(w => L(w) >= 3) },
+  { key:"gold", icon:"🥇", name:"Gold", goal:"alle Karten 5-mal hintereinander wissen",
+    test: (ws, L) => ws.every(w => L(w) >= 5) }
+];
+const MIN_CARDS_FOR_MEDAL = 5;
+const TROPHY_STEPS = [10, 25, 50, 100, 200, 400];
+function trophies(g){ return TROPHY_STEPS.filter(n => g.stars >= n).length; }
+function nextTrophy(g){ return TROPHY_STEPS.find(n => g.stars < n); }
+function starsForRound(ratio){ return ratio >= .9 ? 3 : ratio >= .6 ? 2 : 1; }
+// Lernstand pro Stufe: „Im Kopf“ nutzt den normalen Stand, Tippen und Profi zählen eigene Serien
+function modeLevel(w, mode){ return mode === "normal" ? bestLevel(w) : ((w.ml && w.ml[mode]) || 0); }
+function checkMedals(g, mode){
+  const ws = wordsOf(g.id), won = [];
+  if(ws.length < MIN_CARDS_FOR_MEDAL) return won;
+  const got = g.medals[mode] || (g.medals[mode] = {});
+  const L = w => modeLevel(w, mode);
+  MEDALS.forEach(m => { if(!got[m.key] && m.test(ws, L)){ got[m.key] = true; won.push({ medal:m, mode:modeOf(mode) }); } });
+  return won;
+}
+function medalIcons(g, showMissing){
+  if(showMissing){
+    return `<div class="medal-tiers" role="group" aria-label="Stufe wählen">${MODES.map((md, i) => `
+      <button class="tier t${i}" data-mode="${md.key}" aria-pressed="${S.settings.mode === md.key}">
+        <div class="tier-medals">${MEDALS.map(m => (g.medals[md.key] || {})[m.key]
+          ? `<span title="${md.name}: ${m.name}">${m.icon}</span>`
+          : `<span class="award-off" title="${md.name}: ${m.name} noch nicht geschafft">${m.icon}</span>`).join("")}</div>
+        <div class="tier-name">${md.icon} ${md.short}</div>
+      </button>`).join("")}</div>`;
+  }
+  return MODES.map((md, i) => MEDALS.filter(m => (g.medals[md.key] || {})[m.key])
+    .map(m => `<span class="mini t${i}" title="${md.name}: ${m.name}">${m.icon}</span>`).join("")).join("");
+}
+function awardsHeader(g){
+  const t = trophies(g), next = nextTrophy(g), md = modeOf(S.settings.mode);
+  const got = g.medals[md.key] || {};
+  const nextMedal = MEDALS.find(m => !got[m.key]);
+  const n = wordsOf(g.id).length;
+  let goal = "";
+  if(nextMedal) goal = n < MIN_CARDS_FOR_MEDAL
+    ? `Medaillen gibt es ab ${MIN_CARDS_FOR_MEDAL} Karten.`
+    : `${nextMedal.icon} ${md.name}-${nextMedal.name}: ${nextMedal.goal}`;
+  else goal = `${md.icon} Alle ${md.name}-Medaillen geschafft!`;
+  return `<div class="awards">
+      <span class="stars">⭐ ${g.stars}</span>
+      <span class="trophies">${t ? "🏆".repeat(Math.min(t, 3)) + (t > 3 ? `<small>×${t}</small>` : "") : '<span class="award-off">🏆</span>'}</span>
+    </div>
+    ${medalIcons(g, true)}
+    <p class="level-desc"><strong>${md.icon} ${md.name}:</strong> ${md.desc}</p>
+    ${goal ? `<p class="goal">${goal}</p>` : ""}
+    ${next ? `<p class="goal">🏆 Noch ${next - g.stars} ⭐ bis zum nächsten Pokal</p>` : ""}`;
+}
+
+// Stapel-Reihenfolge der Gruppe aktuell halten
+function stackOf(g){
+  const ids = new Set(wordsOf(g.id).map(w => w.id));
+  g.order = g.order.filter(id => ids.has(id));
+  ids.forEach(id => { if(!g.order.includes(id)) g.order.push(id); });
+  return g.order;
+}
+function plural(n, one, many){ return n + " " + (n === 1 ? one : many); }
+
+/* ---------- Navigation ---------- */
+function go(hash, replace){
+  if(location.hash === hash){ render(); return; }
+  if(replace) location.replace(hash); else location.hash = hash;
+}
+window.addEventListener("hashchange", render);
+
+function render(){
+  const h = location.hash;
+  if(h === "#gruppe" && group(ui.groupId)) return renderGroup();
+  if(h === "#lernen" && ui.session) return renderLearn(true);
+  if(h === "#ergebnis" && ui.result) return renderResult();
+  if(h === "#import" && ui.imp && group(ui.groupId)) return renderImport();
+  if(h === "#sicherung") return renderBackup();
+  if(h && h !== "#start"){ history.replaceState(null, "", location.pathname + location.search); }
+  renderHome();
+}
+function banner(){
+  return storageOk ? "" : '<div class="banner" role="alert">Speichern ist in diesem Browser gerade nicht möglich. Änderungen gehen beim Schließen verloren.</div>';
+}
+
+/* ---------- Start: Gruppen ---------- */
+function renderHome(){
+  const groups = [...S.groups].sort((a,b) => a.name.localeCompare(b.name, "de"));
+  app.innerHTML = banner() + `
+    <header class="hero">
+      <div class="hero-top">
+        <div class="box-art" aria-hidden="true">🗃️</div>
+        <div class="hero-actions">
+          <button class="icon-btn backup-btn" id="addGroupTop" aria-label="Neue Gruppe anlegen" title="Neue Gruppe">➕</button>
+          <button class="icon-btn backup-btn" id="openBackup" aria-label="Sicherung öffnen" title="Sicherung">💾</button>
+        </div>
+      </div>
+      <h1>Wortschatzkiste</h1>
+      <p class="muted">Englisch-Vokabeln sammeln und üben.</p>
+    </header>
+    ${groups.length ? `<div class="list">${groups.map(g => {
+      const ws = wordsOf(g.id), sure = ws.filter(w => isSure(w)).length, t = trophies(g);
+      return `<button class="group-row" data-open="${esc(g.id)}">
+        <span class="row-head"><span class="name">${esc(g.name)}</span>
+          <span class="row-awards">${medalIcons(g, false)}${t ? "🏆" + (t > 1 ? "×" + t : "") : ""} ⭐ ${g.stars}</span></span>
+        <span class="meta">${plural(ws.length, "Karte", "Karten")}${ws.length ? `, ${sure} ${sure === 1 ? "sitzt" : "sitzen"}` : ""}</span>
+        <div class="boxbar" aria-hidden="true"><span style="width:${ws.length ? sure/ws.length*100 : 0}%"></span></div>
+      </button>`;}).join("")}</div>`
+    : `<div class="empty"><p><strong>Noch keine Gruppe da.</strong></p><p class="muted">Tippe oben rechts auf ➕ und leg die erste an, zum Beispiel „Unit 1 – Colours“.</p></div>`}
+
+  `;
+  app.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { ui.groupId = b.dataset.open; ui.editMode = false; go("#gruppe"); });
+  const newGroupFn = async () => {
+    const r = await ask({ title:"Neue Gruppe", fields:[{name:"name", label:"Name der Gruppe", placeholder:"z. B. Unit 2 – Animals"}], ok:"Gruppe anlegen" });
+    if(!r || !norm(r.name)) return;
+    const g = { id: uid(), name: norm(r.name), created: Date.now(), order: [] };
+    S.groups.push(g); save();
+    ui.groupId = g.id; ui.editMode = true; go("#gruppe");
+  };
+  document.getElementById("addGroupTop").onclick = newGroupFn;
+  document.getElementById("openBackup").onclick = () => go("#sicherung");
+  window.scrollTo(0,0);
+}
+
+/* ---------- Gruppe ---------- */
+function renderGroup(){
+  const g = group(ui.groupId), ws = wordsOf(g.id);
+  if(ui.editMode) return renderEdit(g, ws);
+  const sure = ws.filter(w => isSure(w)).length;
+  const dirs = [["ende","EN → DE"],["deen","DE → EN"],["mix","Gemischt"]];
+  app.innerHTML = banner() + `
+    <div class="topbar">
+      <button class="back" id="back">‹ Gruppen</button>
+      <button class="btn small ghost" id="editToggle">✏️ Bearbeiten</button>
+    </div>
+    <h1>${esc(g.name)}</h1>
+    ${awardsHeader(g)}
+
+    <section class="panel">
+      <div class="stack ${ws.length ? "tappable" : ""}" id="stackStart" ${ws.length ? 'role="button" tabindex="0" aria-label="Üben starten"' : 'aria-hidden="true"'}>
+        ${ws.length > 2 ? '<div class="under u2 paper"></div>' : ""}
+        ${ws.length > 1 ? '<div class="under u1 paper"></div>' : ""}
+        <div class="top-card"><div class="card"><div class="face paper stack-info">
+          <div class="lang">🗃️ Kartenstapel</div>
+          <div class="word">${plural(ws.length, "Karte", "Karten")}</div>
+          ${ws.length ? '<div class="tap-hint"><span>▶ Tippe hier, um zu üben</span></div>' : '<div class="hint">Der Stapel ist noch leer.</div>'}
+        </div></div></div>
+      </div>
+      ${ws.length ? `<div class="sure"><span>${sure} von ${ws.length} sitzen</span><div class="bar"><span style="width:${sure/ws.length*100}%"></span></div></div>` : ""}
+      <div class="seg" role="group" aria-label="Richtung">
+        ${dirs.map(([k,l]) => `<button data-dir="${k}" aria-pressed="${ui.dir===k}">${l}</button>`).join("")}
+      </div>
+      ${ws.length ? "" : `<p class="muted" style="text-align:center;margin-top:8px">Tippe auf „Bearbeiten“, um Karten hinzuzufügen.</p>`}
+    </section>
+  `;
+  document.getElementById("back").onclick = () => go("#start");
+  document.getElementById("editToggle").onclick = () => { ui.editMode = true; ui.addOpen = !ws.length; renderGroup(); window.scrollTo(0,0); };
+  app.querySelectorAll("[data-dir]").forEach(b => b.onclick = () => { ui.dir = b.dataset.dir; renderGroup(); });
+  app.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { S.settings.mode = b.dataset.mode; save(); renderGroup(); });
+  if(ws.length){
+    const stackBtn = document.getElementById("stackStart");
+    const begin = () => startSession();
+    stackBtn.onclick = begin;
+    stackBtn.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); begin(); } };
+  }
+}
+
+/* ---------- Wasser-Weg: Rohr-Labyrinth ---------- */
+const PX = [60, 180, 300], P_TOP = 74, P_BOTTOM = 440;
+function makePipes(){
+  const pairs = [[0,1],[1,2],[0,2]];
+  let swaps, final, n = 0;
+  do {
+    swaps = []; let prev = -1;
+    for(let k = 0; k < 6; k++){
+      let i; do { i = Math.floor(Math.random() * 3); } while(i === prev);
+      prev = i; swaps.push(pairs[i]);
+    }
+    final = [0,1,2].map(f => { let lane = f; swaps.forEach(([a,b]) => { lane = lane === a ? b : lane === b ? a : lane; }); return lane; });
+  } while(final.every((l, f) => l === f) && n++ < 20);
+  return { swaps, final };
+}
+function pipePath(st, f){
+  const h = (P_BOTTOM - P_TOP) / st.swaps.length;
+  let lane = f, d = `M ${PX[lane]} 58 L ${PX[lane]} ${P_TOP}`;
+  st.swaps.forEach(([a, b], k) => {
+    const y0 = P_TOP + k * h, y1 = y0 + h;
+    const nl = lane === a ? b : lane === b ? a : lane;
+    d += nl === lane ? ` L ${PX[lane]} ${y1}` : ` C ${PX[lane]} ${y0 + h * .55}, ${PX[nl]} ${y0 + h * .45}, ${PX[nl]} ${y1}`;
+    lane = nl;
+  });
+  return d + ` L ${PX[lane]} 458`;
+}
+function pipesSVG(st){
+  const order = st.drawOrder || (st.drawOrder = shuffle([0,1,2]));
+  const pipes = order.map(f => {
+    const d = pipePath(st, f);
+    return `<g class="pipe">
+      <path d="${d}" class="p-gap"/><path d="${d}" class="p-body"/><path d="${d}" class="p-shine"/>
+      <path d="${d}" class="water" data-f="${f}"/>
+    </g>`;
+  }).join("");
+  const taps = [0,1,2].map(f => `
+    <g class="tap" data-f="${f}" role="button" tabindex="0" aria-label="Wasserhahn ${f + 1}">
+      <rect x="${PX[f] - 40}" y="0" width="80" height="66" fill="transparent"/>
+      <rect x="${PX[f] - 8}" y="34" width="16" height="26" rx="4" class="tap-metal"/>
+      <rect x="${PX[f] - 22}" y="24" width="44" height="16" rx="8" class="tap-metal"/>
+      <g class="handle" style="transform-origin:${PX[f]}px 18px">
+        <rect x="${PX[f] - 18}" y="14" width="36" height="9" rx="4.5" class="tap-red"/>
+        <rect x="${PX[f] - 4.5}" y="4" width="9" height="28" rx="4.5" class="tap-red"/>
+        <circle cx="${PX[f]}" cy="18" r="6" class="tap-cap"/>
+      </g>
+      <text x="${PX[f]}" y="${70}" class="tap-num">${f + 1}</text>
+    </g>`).join("");
+  const basins = [0,1,2].map(l => `
+    <g class="basin" data-l="${l}">
+      <clipPath id="bc${l}"><rect x="${PX[l] - 54}" y="458" width="108" height="56" rx="12"/></clipPath>
+      <rect x="${PX[l] - 54}" y="458" width="108" height="56" rx="12" class="b-box"/>
+      <rect x="${PX[l] - 54}" y="458" width="108" height="56" clip-path="url(#bc${l})" class="b-fill"/>
+      <text x="${PX[l]}" y="487" class="b-word">${esc(st.options[l])}</text>
+      <text x="${PX[l]}" y="448" class="b-flower">🌻</text>
+      <text x="${PX[l] + 46}" y="464" class="b-mark">✗</text>
+    </g>`).join("");
+  return `<svg id="pipes" viewBox="0 0 360 520" role="img" aria-label="Rohr-Labyrinth mit drei Wasserhähnen">${pipes}${taps}${basins}</svg>`;
+}
+function runPipes(st, ans, onResult){
+  const svg = document.getElementById("pipes");
+  svg.querySelectorAll(".water").forEach(p => {
+    const L = p.getTotalLength();
+    p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
+  });
+  svg.querySelectorAll(".b-word").forEach(t => {
+    let fs = 17; t.setAttribute("font-size", fs);
+    while(t.getComputedTextLength() > 98 && fs > 9){ fs--; t.setAttribute("font-size", fs); }
+  });
+  const correctF = st.final.findIndex(l => st.options[l] === ans);
+  const flow = (f, quick) => new Promise(res => {
+    const tap = svg.querySelector(`.tap[data-f="${f}"]`), water = svg.querySelector(`.water[data-f="${f}"]`);
+    tap.classList.add("open");
+    const dur = quick ? 1.4 : 2.4;
+    water.getBoundingClientRect();
+    water.style.transition = `stroke-dashoffset ${dur}s linear`;
+    water.style.strokeDashoffset = "0";
+    setTimeout(() => {
+      const basin = svg.querySelector(`.basin[data-l="${st.final[f]}"]`);
+      basin.classList.add("full");
+      setTimeout(res, 500);
+    }, dur * 1000);
+  });
+  const pick = f => {
+    if(st.finished || st.running) return;
+    st.running = true;
+    svg.classList.add("busy");
+    flow(f).then(() => {
+      const basin = svg.querySelector(`.basin[data-l="${st.final[f]}"]`);
+      if(f === correctF){ basin.classList.add("win"); onResult(true); }
+      else {
+        basin.classList.add("lose");
+        setTimeout(() => flow(correctF, true).then(() => {
+          svg.querySelector(`.basin[data-l="${st.final[correctF]}"]`).classList.add("win");
+          onResult(false);
+        }), 350);
+      }
+    });
+  };
+  svg.querySelectorAll(".tap").forEach(t => {
+    t.addEventListener("click", () => pick(+t.dataset.f));
+    t.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(+t.dataset.f); } });
+  });
+}
+
+/* ---------- Wort-Gipfel: kleines Jump-and-Run ---------- */
+const HEROES = ["🦊", "🤖", "🧑‍🚀", "🐰"];
+function startClimb(st, ans, onResult){
+  const canvas = document.getElementById("climb");
+  const ctx = canvas.getContext("2d");
+  const W = 360;                       // Spielwelt ist immer 360 breit und wird skaliert
+  const GAP = 92, STEPS = 5, GROUND = 40;
+  const worldH = GROUND + GAP * (STEPS + 1) + 120;
+  const groundY = worldH - GROUND;
+  const topY = groundY - GAP * (STEPS + 1);
+  const font = '"Baloo 2","Trebuchet MS",system-ui,sans-serif';
+  const s = ui.session;
+  if(!st.hero) st.hero = HEROES[Math.floor(Math.random() * HEROES.length)];
+
+  // Level aufbauen
+  const plats = [{ x:0, y:groundY, w:W, kind:"ground" }];
+  const coins = [];
+  let cx = W / 2;
+  for(let i = 1; i <= STEPS; i++){
+    const w = 84 + Math.random() * 26;
+    let nx;
+    if(i === STEPS) nx = W / 2 + (Math.random() * 40 - 20);
+    else { let tries = 0; do { nx = 60 + Math.random() * (W - 120); tries++; } while((Math.abs(nx - cx) < 55 || Math.abs(nx - cx) > 150) && tries < 30); }
+    cx = nx;
+    const y = groundY - GAP * i;
+    plats.push({ x: cx - w / 2, y, w, kind:"step" });
+    coins.push({ x: cx, y: y - 26, got:false });
+    if(Math.random() < .6) coins.push({ x: Math.max(24, Math.min(W - 24, cx + (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 50))), y: y - GAP / 2 - 10, got:false });
+  }
+  const tw = 100, centers = [62, W / 2, W - 62];
+  const targets = st.options.map((word, i) => ({ x: centers[i] - tw / 2, y: topY, w: tw, kind:"target", word, right: word === ans, broken:false }));
+  plats.push(...targets);
+  [50, 100, W - 100, W - 50].forEach(x => coins.push({ x, y: groundY - 24, got:false })); // nicht dort, wo die Figur startet
+
+  const p = { x: W / 2, y: groundY, vx:0, vy:0, w:26, h:30, onGround:true, face:1 };
+  const keys = { left:false, right:false }; let jumpAt = -1, over = false, overAt = 0, camY = worldH, scale = 1, viewH = 400;
+  const pops = [];
+  let sessionCoins = s.coins || 0;
+
+  function resize(){
+    const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+    scale = r.width / W; viewH = r.height / scale;
+    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+  }
+  resize();
+  camY = worldH - viewH;
+
+  // Steuerung
+  const hold = (id, key) => {
+    const b = document.getElementById(id);
+    const on = e => { e.preventDefault(); keys[key] = true; try{ b.setPointerCapture(e.pointerId); }catch(_){} b.classList.add("down"); };
+    const off = () => { keys[key] = false; b.classList.remove("down"); };
+    b.addEventListener("pointerdown", on); b.addEventListener("pointerup", off);
+    b.addEventListener("pointercancel", off); b.addEventListener("lostpointercapture", off);
+    b.addEventListener("contextmenu", e => e.preventDefault());
+  };
+  hold("cLeft", "left"); hold("cRight", "right");
+  const jb = document.getElementById("cJump");
+  jb.addEventListener("pointerdown", e => { e.preventDefault(); jumpAt = performance.now(); jb.classList.add("down"); });
+  ["pointerup","pointercancel","pointerleave"].forEach(t => jb.addEventListener(t, () => jb.classList.remove("down")));
+  jb.addEventListener("contextmenu", e => e.preventDefault());
+  const kd = e => {
+    if(!document.body.contains(canvas)){ window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); return; }
+    if(e.key === "ArrowLeft") keys.left = true;
+    if(e.key === "ArrowRight") keys.right = true;
+    if(e.key === "ArrowUp" || e.key === " "){ e.preventDefault(); jumpAt = performance.now(); }
+  };
+  const ku = e => { if(e.key === "ArrowLeft") keys.left = false; if(e.key === "ArrowRight") keys.right = false; };
+  window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
+
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+  function step(dt){
+    const SPEED = 190, G = 1850, JUMP = 690;
+    p.vx = (keys.right ? SPEED : 0) - (keys.left ? SPEED : 0);
+    if(p.vx) p.face = p.vx > 0 ? 1 : -1;
+    if(jumpAt > 0 && performance.now() - jumpAt < 160 && p.onGround && !over){ p.vy = -JUMP; p.onGround = false; jumpAt = -1; }
+    if(over && st.won){ p.vx = 0; }
+    p.vy = Math.min(p.vy + G * dt, 1100);
+    const prevBottom = p.y;
+    p.x = Math.max(p.w / 2, Math.min(W - p.w / 2, p.x + p.vx * dt));
+    p.y += p.vy * dt;
+    p.onGround = false;
+    if(p.vy >= 0){
+      for(const pl of plats){
+        if(pl.broken) continue;
+        if(p.x + p.w / 2 - 4 > pl.x && p.x - p.w / 2 + 4 < pl.x + pl.w && prevBottom <= pl.y + 1 && p.y >= pl.y){
+          p.y = pl.y; p.vy = 0; p.onGround = true;
+          if(pl.kind === "target" && !over) landOn(pl);
+          break;
+        }
+      }
+    }
+    for(const c of coins){
+      if(!c.got && Math.abs(c.x - p.x) < 20 && Math.abs(c.y - (p.y - p.h / 2)) < 24){
+        c.got = true; sessionCoins++; s.coins = sessionCoins;
+        pops.push({ x:c.x, y:c.y, t:0 });
+      }
+    }
+    pops.forEach(o => o.t += dt);
+    const target = p.y - viewH * .6;
+    camY += (Math.max(0, Math.min(worldH - viewH, target)) - camY) * Math.min(1, dt * 6);
+  }
+
+  function landOn(pl){
+    over = true; overAt = performance.now();
+    if(pl.right){ st.won = true; onResult(true); }
+    else {
+      pl.cracking = performance.now();
+      setTimeout(() => { pl.broken = true; targets.forEach(t => { if(t.right) t.glow = true; }); }, 350);
+      setTimeout(() => onResult(false), 900);
+    }
+  }
+
+  function draw(){
+    const sky = ctx.createLinearGradient(0, 0, 0, viewH);
+    const h = Math.max(0, Math.min(1, camY / (worldH - viewH || 1)));
+    sky.addColorStop(0, `hsl(${205 + 25 * (1 - h)}, 75%, ${58 + 10 * h}%)`);
+    sky.addColorStop(1, `hsl(195, 70%, ${80 + 6 * h}%)`);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, viewH);
+    ctx.save(); ctx.translate(0, -camY);
+    // Wolken
+    ctx.fillStyle = "rgba(255,255,255,.75)";
+    [[60, 120], [270, 260], [120, 420], [300, 560], [70, 690]].forEach(([x, y]) => {
+      ctx.beginPath(); ctx.ellipse(x, y, 38, 14, 0, 0, Math.PI * 2); ctx.ellipse(x + 22, y - 8, 24, 13, 0, 0, Math.PI * 2); ctx.fill();
+    });
+    // Plattformen
+    for(const pl of plats){
+      if(pl.broken) continue;
+      let shake = 0;
+      if(pl.cracking) shake = Math.sin(performance.now() / 30) * 3;
+      if(pl.kind === "ground"){
+        ctx.fillStyle = "#7a5230"; ctx.fillRect(0, pl.y, W, GROUND + 200);
+        ctx.fillStyle = "#58b947"; ctx.fillRect(0, pl.y, W, 10);
+      } else if(pl.kind === "step"){
+        ctx.fillStyle = "#8a5a33"; roundRect(pl.x, pl.y, pl.w, 16, 6); ctx.fill();
+        ctx.fillStyle = "#5fc24c"; roundRect(pl.x, pl.y, pl.w, 7, 4); ctx.fill();
+      } else {
+        const x = pl.x + shake;
+        if(pl.glow){ ctx.save(); ctx.shadowColor = "#ffe066"; ctx.shadowBlur = 22; }
+        ctx.fillStyle = pl.glow || (st.won && pl.right) ? "#ffd43b" : "#c98b4b"; roundRect(x, pl.y, pl.w, 18, 6); ctx.fill();
+        if(pl.glow) ctx.restore();
+        ctx.fillStyle = "rgba(0,0,0,.18)"; for(let k = 1; k < 4; k++) ctx.fillRect(x + k * pl.w / 4, pl.y + 3, 2, 12);
+        // Schild mit dem Wort
+        let fs = 16; ctx.font = `800 ${fs}px ${font}`;
+        while(ctx.measureText(pl.word).width > pl.w - 6 && fs > 10){ fs--; ctx.font = `800 ${fs}px ${font}`; }
+        const tw2 = Math.min(pl.w + 6, ctx.measureText(pl.word).width + 14);
+        ctx.fillStyle = "rgba(255,255,255,.95)"; roundRect(x + pl.w / 2 - tw2 / 2, pl.y - 30 - fs, tw2, fs + 12, 8); ctx.fill();
+        ctx.fillStyle = "#1b2a26"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(pl.word, x + pl.w / 2, pl.y - 24 - fs / 2 + 1, pl.w + 2);
+        if(st.won && pl.right){ ctx.font = `30px ${font}`; ctx.fillText("🚩", x + pl.w - 14, pl.y - 52 - fs); }
+      }
+    }
+    // Münzen
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `20px ${font}`;
+    const bob = Math.sin(performance.now() / 250) * 3;
+    coins.forEach(c => { if(!c.got) ctx.fillText("🪙", c.x, c.y + bob); });
+    pops.forEach(o => { if(o.t < .8){ ctx.globalAlpha = 1 - o.t / .8; ctx.font = `800 16px ${font}`; ctx.fillStyle = "#b8860b"; ctx.fillText("+1", o.x, o.y - o.t * 40); ctx.globalAlpha = 1; } });
+    // Figur
+    ctx.save(); ctx.translate(p.x, p.y - p.h / 2 + 2); if(p.face < 0) ctx.scale(-1, 1);
+    const squash = p.onGround ? 1 : 1.06;
+    ctx.scale(1 / squash, squash);
+    ctx.font = `32px ${font}`; ctx.fillText(st.hero, 0, 0);
+    ctx.restore();
+    if(st.won){ ctx.font = `28px ${font}`; ctx.fillText("🎉", p.x + 22, p.y - 48); }
+    ctx.restore();
+    // Anzeige
+    ctx.fillStyle = "rgba(255,255,255,.85)"; roundRect(8, 8, 74, 30, 12); ctx.fill();
+    ctx.fillStyle = "#1b2a26"; ctx.font = `800 17px ${font}`; ctx.textAlign = "left"; ctx.fillText(`🪙 ${sessionCoins}`, 16, 24);
+    if(camY > worldH - viewH - 40 && !over){
+      ctx.textAlign = "center"; ctx.font = `700 13px ${font}`; ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.fillText("Spring nach oben zur richtigen Übersetzung!", W / 2, 54);
+    }
+  }
+
+  let last = performance.now();
+  function loop(now){
+    if(!document.body.contains(canvas)) return;   // Spiel beendet, sobald die Karte wechselt
+    const dt = Math.min(.033, (now - last) / 1000); last = now;
+    if(canvas.getBoundingClientRect().width / W !== scale) resize();
+    step(dt); draw();
+    if(over && now - overAt > 6000) return;
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Bearbeiten ---------- */
+function renderEdit(g, ws){
+  if(ui.addOpen === undefined) ui.addOpen = !ws.length;
+  const sorted = [...ws].sort((a, b) => bestLevel(a) - bestLevel(b) || a.en.localeCompare(b.en, "en"));
+  app.innerHTML = banner() + `
+    <div class="topbar">
+      <button class="back" id="back">‹ Gruppen</button>
+      <button class="btn small" id="editToggle">✓ Fertig</button>
+    </div>
+    <h1>${esc(g.name)}</h1>
+    <div class="group-tools">
+      <button class="btn ghost small" id="rename">✏️ Umbenennen</button>
+      <button class="btn ghost small" id="delGroup" style="color:var(--bad)">🗑️ Löschen</button>
+    </div>
+
+    <section class="panel">
+      <div class="cards-head">
+        <h2>Karten <span class="count">${ws.length}</span></h2>
+        <div class="cards-actions">
+          <button class="icon-btn act" id="addOpen" aria-label="Neue Karte eingeben" aria-pressed="${!!ui.addOpen}" title="Neue Karte">➕</button>
+          <button class="icon-btn act" id="photo" aria-label="Vokabelliste fotografieren" title="Foto">📷</button>
+          <button class="icon-btn act" id="pasteList" aria-label="Liste einfügen" title="Liste einfügen">📋</button>
+        </div>
+      </div>
+      <input type="file" id="photoFile" accept="image/*" capture="environment" hidden>
+      <div id="photoStatus" aria-live="polite"></div>
+      ${ui.addOpen ? `
+      <div class="add-form">
+        <input type="text" id="en" placeholder="🇬🇧 Englisch" aria-label="Englisch" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="next">
+        <input type="text" id="de" placeholder="🇩🇪 Deutsch" aria-label="Deutsch" autocomplete="off" enterkeyhint="done">
+        <div class="answers"><button class="btn ghost" id="addClose">Schließen</button><button class="btn" id="add">Speichern</button></div>
+      </div>` : ""}
+      <div class="msg" id="msg" aria-live="polite"></div>
+      ${ws.length ? `
+      <ul class="words">${sorted.map(w => `
+        <li><button data-word="${esc(w.id)}" aria-label="${esc(w.en)} bearbeiten">
+          <span class="dot" style="background:${dotColor(bestLevel(w))}"></span>
+          <span class="pair"><span class="en">${esc(w.en)}</span> <span class="de">– ${esc(w.de)}</span></span>
+          <span class="edit-ico" aria-hidden="true">✏️</span>
+        </button></li>`).join("")}
+      </ul>
+      <p class="muted" style="font-size:.9rem;margin-top:10px">Sortiert von 🔴 noch unsicher über 🟡 wird besser bis 🟢 sitzt</p>`
+      : `<p class="muted" style="text-align:center;margin:12px 0 4px">Noch keine Karten. Tippe auf ➕ zum Eintippen, 📷 für ein Foto der Vokabelliste oder 📋 zum Einfügen.</p>`}
+    </section>
+  `;
+  document.getElementById("back").onclick = () => { ui.editMode = false; ui.addOpen = undefined; go("#start"); };
+  document.getElementById("editToggle").onclick = () => { ui.editMode = false; ui.addOpen = undefined; renderGroup(); window.scrollTo(0,0); };
+  document.getElementById("rename").onclick = async () => {
+    const r = await ask({ title:"Gruppe umbenennen", fields:[{name:"name", label:"Neuer Name", value:g.name}], ok:"Namen speichern" });
+    if(r && norm(r.name)){ g.name = norm(r.name); save(); renderGroup(); }
+  };
+  document.getElementById("delGroup").onclick = async () => {
+    const r = await ask({ title:`„${g.name}“ löschen?`, text:`Die Gruppe und alle ${plural(ws.length, "Karte", "Karten")} darin werden gelöscht.`, ok:"Gruppe löschen", danger:true });
+    if(!r) return;
+    S.words = S.words.filter(w => w.groupId !== g.id);
+    S.groups = S.groups.filter(x => x.id !== g.id); save();
+    ui.groupId = null; ui.editMode = false; ui.addOpen = undefined; go("#start", true);
+  };
+  document.getElementById("addOpen").onclick = () => { ui.addOpen = !ui.addOpen; renderGroup(); if(ui.addOpen) document.getElementById("en").focus(); };
+  document.getElementById("pasteList").onclick = () => {
+    ui.imp = { mode:"one", text:"", enText:"", deText:"", preview:null };
+    go("#import");
+  };
+  const msg = document.getElementById("msg");
+  if(ui.flash){ msg.textContent = ui.flash; msg.className = "msg ok"; ui.flash = null; }
+  if(ui.addOpen){
+    const en = document.getElementById("en"), de = document.getElementById("de");
+    if(ui.focusAdd){ en.focus(); ui.focusAdd = false; }
+    en.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); de.focus(); } });
+    de.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); addWord(); } });
+    document.getElementById("add").onclick = addWord;
+    document.getElementById("addClose").onclick = () => { ui.addOpen = false; renderGroup(); };
+    function addWord(){
+      const a = norm(en.value), b = norm(de.value);
+      if(!a || !b){ msg.textContent = "Bitte Englisch und Deutsch ausfüllen."; msg.className = "msg err"; (a ? de : en).focus(); return; }
+      if(ws.some(w => w.en.toLowerCase() === a.toLowerCase())){ msg.textContent = `„${a}“ ist schon in dieser Gruppe.`; msg.className = "msg err"; en.focus(); return; }
+      const w = { id: uid(), groupId: g.id, en: a, de: b, level: { ende:0, deen:0 }, created: Date.now() };
+      S.words.push(w);
+      stackOf(g); g.order = g.order.filter(id => id !== w.id); g.order.unshift(w.id); // neue Karten kommen nach vorne
+      save();
+      ui.flash = `„${a}“ gespeichert.`; ui.focusAdd = true;
+      renderGroup();
+    }
+  }
+  app.querySelectorAll("[data-word]").forEach(b => b.onclick = () => editWord(b.dataset.word));
+
+  // Foto der Vokabelliste
+  const file = document.getElementById("photoFile"), status = document.getElementById("photoStatus");
+  document.getElementById("photo").onclick = () => {
+    if(PHOTO.ok === true){ file.click(); return; }
+    status.innerHTML = PHOTO.ok === null
+      ? `<div class="note info">Die Fotoerkennung startet noch. Tippe gleich noch einmal auf 📷.</div>`
+      : `<div class="note info">Die Fotoerkennung funktioniert hier nicht. Nutze 📋 Liste einfügen zusammen mit Google Lens.</div>`;
+  };
+  file.onchange = () => { const f = file.files[0]; file.value = ""; if(f) readPhoto(f, g, status); };
+}
+
+async function editWord(id){
+  const w = wordById(id); if(!w) return;
+  const r = await ask({ title:"Karte bearbeiten",
+    fields:[{name:"en", label:"🇬🇧 Englisch", value:w.en}, {name:"de", label:"🇩🇪 Deutsch", value:w.de}],
+    ok:"Änderungen speichern", extra:"🗑️ Karte löschen" });
+  if(!r) return;
+  if(r === "extra"){
+    const ok = await choose(`„${w.en}“ löschen?`, `Die Karte „${w.en} – ${w.de}“ wird aus der Gruppe entfernt.`, [{ value:"yes", label:"Ja, löschen", danger:true }]);
+    if(!ok) return;
+    S.words = S.words.filter(x => x.id !== id); save();
+    ui.flash = `„${w.en}“ gelöscht.`;
+    renderGroup(); return;
+  }
+  if(norm(r.en) && norm(r.de)){ w.en = norm(r.en); w.de = norm(r.de); save(); }
+  renderGroup();
+}
+
+/* ---------- Foto lesen (über Claude, nur auf claude.ai) ---------- */
+const PHOTO = { ok: null, sample: null };
+(async () => {
+  try{
+    const s = (window.claude && typeof window.claude.use === "function") ? await window.claude.use("sample") : null;
+    const caps = s ? await s.limits().catch(() => null) : null;
+    PHOTO.sample = s; PHOTO.ok = !!(caps && caps.images); PHOTO.maxBytes = caps && caps.images ? caps.images.maxInputBytes : 0;
+  }catch(e){ PHOTO.ok = false; }
+})();
+
+function shrinkImage(file){
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const max = 1800, k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => resolve(b || file), "image/jpeg", .85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function readPhoto(file, g, status){
+  const ctl = new AbortController();
+  status.innerHTML = `<div class="photo-busy"><span class="spin" aria-hidden="true">📷</span>
+    <span><strong>Foto wird gelesen …</strong><br><span class="muted">Das dauert etwa 10 bis 40 Sekunden.</span></span>
+    <button class="btn ghost small" id="photoStop">Stopp</button></div>`;
+  document.getElementById("photoStop").onclick = () => ctl.abort();
+  const prompt = "Das Bild zeigt eine Vokabelliste aus einem Englisch-Schulbuch mit englischen Wörtern und ihrer deutschen Übersetzung. " +
+    "Lies alle Vokabelpaare der Reihe nach von oben nach unten ab. Lass Lautschrift, Seitenzahlen, Überschriften und Beispielsätze weg. " +
+    "Übernimm die Wörter genau so, wie sie gedruckt sind, auch „to“ bei Verben und Artikel wie „der“, „die“, „das“. " +
+    "Handschriftliche Notizen nur übernehmen, wenn sie klar ein Vokabelpaar sind. " +
+    'Antworte nur mit einem JSON-Array, zum Beispiel [{"en":"dog","de":"Hund"},{"en":"to go","de":"gehen"}]. Wenn du keine Vokabeln findest, antworte mit [].';
+  try{
+    const blob = await shrinkImage(file);
+    const data = await PHOTO.sample.json(prompt, { images: [blob], signal: ctl.signal });
+    const rows = Array.isArray(data) ? data.filter(x => x && typeof x === "object")
+      .map(x => ({ en: norm(String(x.en || "")), de: norm(String(x.de || "")) })).filter(x => x.en || x.de) : [];
+    if(!rows.length){
+      status.innerHTML = `<div class="note warn">Auf dem Foto wurden keine Vokabeln gefunden. Versuch es mit einem schärferen Foto, auf dem nur die Liste zu sehen ist.</div>`;
+      return;
+    }
+    ui.imp = { mode:"one", text:"", enText:"", deText:"", preview:{ en: rows.map(r => r.en), de: rows.map(r => r.de), swapped:false, how:"photo" } };
+    go("#import");
+  }catch(e){
+    const code = e && e.code;
+    if(code === "cancelled"){ status.innerHTML = ""; return; }
+    const text = code === "not_granted" ? "Die Fotoerkennung wurde nicht erlaubt. Du kannst stattdessen 📋 Liste einfügen nutzen."
+      : code === "rate_limited" || code === "queue_overflow" ? "Gerade sind zu viele Anfragen unterwegs. Bitte kurz warten und noch einmal versuchen."
+      : code === "image_rejected" ? "Dieses Bild konnte nicht verwendet werden. Versuch es mit einem normalen Foto."
+      : code === "images_unavailable" || code === "sampling_disabled" ? "Die Fotoerkennung funktioniert hier nicht. Nutze 📋 Liste einfügen."
+      : "Das Foto konnte nicht gelesen werden. Versuch es noch einmal.";
+    status.innerHTML = `<div class="note warn">${text}</div>`;
+  }
+}
+
+/* ---------- Üben mit dem Stapel ----------
+   Die vorderste Karte wird beantwortet und wieder einsortiert:
+   nicht gewusst -> gleich hinter die nächsten 2 Karten,
+   gewusst      -> je sicherer, desto weiter nach hinten. */
+function sortBackPosition(level, len){
+  if(level === 0) return Math.min(2, len);
+  return Math.min(len, Math.pow(2, level + 1)); // 4, 8, 16, 32, 64
+}
+
+function startSession(){
+  const g = group(ui.groupId), stack = stackOf(g);
+  save();
+  ui.session = { target: Math.min(ROUND_SIZE, stack.length), done: 0, firstTry: 0, missed: new Set(),
+    flipped: false, dir: null, type: null, lastType: null, mode: modeOf(S.settings.mode).key, state: null };
+  pickDir();
+  go("#lernen");
+}
+function pickDir(){
+  const s = ui.session;
+  s.dir = ui.dir === "mix" ? (Math.random() < .5 ? "ende" : "deen") : ui.dir;
+  s.lastType = s.type; s.type = null; s.state = null; s.flipped = false;
+}
+
+/* ---------- Profi-Modus: Aufgabenarten ---------- */
+const TYPES = {
+  flip:     { icon:"🃏", name:"Karte umdrehen" },
+  typing:   { icon:"⌨️", name:"Eintippen" },
+  choice:   { icon:"🎯", name:"Richtig antippen" },
+  scramble: { icon:"🔤", name:"Buchstabensalat" },
+  frog:     { icon:"🐸", name:"Frosch-Sprung" },
+  climb:    { icon:"⛰️", name:"Wort-Gipfel" },
+  pipes:    { icon:"🚰", name:"Wasser-Weg" }
+};
+function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function answerOf(w, dir){ return dir === "ende" ? w.de : w.en; }
+function promptOf(w, dir){ return dir === "ende" ? w.en : w.de; }
+function distractors(w, dir, n){
+  const mine = answerOf(w, dir).toLowerCase();
+  const fromGroup = wordsOf(w.groupId).filter(x => x.id !== w.id);
+  let pool = fromGroup.map(x => answerOf(x, dir));
+  if(pool.length < n) pool = pool.concat(S.words.filter(x => x.groupId !== w.groupId).map(x => answerOf(x, dir)));
+  const seen = new Set([mine]), out = [];
+  shuffle(pool).forEach(t => { const k = t.toLowerCase(); if(out.length < n && !seen.has(k)){ seen.add(k); out.push(t); } });
+  return out;
+}
+function chooseType(w, dir){
+  const ans = answerOf(w, dir), letters = ans.replace(/\s/g, "");
+  const ok = ["flip", "typing"];
+  if(distractors(w, dir, 2).length >= 2){ ok.push("choice", "frog", "climb", "pipes"); }
+  const s = ui.session;
+  const pick = ok.filter(t => t !== s.lastType);
+  const list = pick.length ? pick : ok;
+  return list[Math.floor(Math.random() * list.length)];
+}
+// Groß/Klein egal, Leerzeichen und Satzzeichen am Ende egal, „to“ vor Verben optional,
+// bei „groß, hoch“ oder „groß / hoch“ zählt auch eine Variante.
+function simple(t){ return t.toLowerCase().replace(/[’`]/g, "'").replace(/[.!?]+$/,"").replace(/\s+/g," ").trim().replace(/^to /, ""); }
+function isCorrect(input, answer){
+  const a = simple(input);
+  if(!a) return false;
+  if(a === simple(answer)) return true;
+  return answer.split(/\s*[,/;]\s*/).some(part => part && simple(part) === a);
+}
+
+function renderLearn(entering){
+  const s = ui.session, g = group(ui.groupId);
+  if(!g){ ui.session = null; return go("#start", true); }
+  const stack = stackOf(g);
+  const w = wordById(stack[0]);
+  if(!w){ ui.session = null; return go("#gruppe", true); }
+  if(!s.type) s.type = s.mode === "profi" ? chooseType(w, s.dir) : s.mode === "tipp" ? "typing" : "flip";
+  const head = `
+    <div class="topbar">
+      <button class="back" id="quit">✕ Beenden</button>
+      <span class="muted" style="font-weight:700">${modeOf(s.mode).icon} ${s.done} / ${s.target}</span>
+    </div>
+    <div class="progress" aria-hidden="true"><span style="width:${s.done/s.target*100}%"></span></div>
+    ${s.mode === "profi" ? `<p class="task-type">${TYPES[s.type].icon} ${TYPES[s.type].name}</p>` : ""}`;
+  if(s.type === "flip") renderFlip(head, w, stack, entering);
+  else renderChallenge(head, w);
+  document.getElementById("quit").onclick = () => { ui.session = null; go("#gruppe", true); };
+}
+
+function renderFlip(head, w, stack, entering){
+  const s = ui.session, askEn = s.dir === "ende";
+  const front = promptOf(w, s.dir), back = answerOf(w, s.dir);
+  const frontLang = askEn ? "🇬🇧 Englisch" : "🇩🇪 Deutsch", backLang = askEn ? "🇩🇪 Deutsch" : "🇬🇧 Englisch";
+  const again = s.missed.has(w.id);
+  app.innerHTML = head + `
+    <div class="stack">
+      ${stack.length > 2 ? '<div class="under u2 paper" aria-hidden="true"></div>' : ""}
+      ${stack.length > 1 ? '<div class="under u1 paper" aria-hidden="true"></div>' : ""}
+      <div class="top-card ${entering ? "" : "enter"}" id="top">
+        <div class="card ${s.flipped ? "flipped" : ""}" id="card" role="button" tabindex="0" aria-label="Karte umdrehen">
+          <div class="face front paper">
+            <div class="lang">${frontLang}</div>
+            ${askEn ? '<button class="speak" aria-label="Vorlesen">🔊</button>' : ""}
+            <div class="word">${esc(front)}</div>
+            <div class="hint">${again ? "Die kennst du schon von vorhin! Tippe zum Umdrehen." : "Weißt du es? Tippe auf die Karte zum Umdrehen."}</div>
+          </div>
+          <div class="face back paper">
+            <div class="lang">${backLang}</div>
+            ${!askEn ? '<button class="speak" aria-label="Vorlesen">🔊</button>' : ""}
+            <div class="word">${esc(back)}</div>
+            <div class="hint">${esc(front)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="controls"></div>
+  `;
+  const card = document.getElementById("card"), controls = document.getElementById("controls");
+  function showControls(){
+    controls.innerHTML = s.flipped
+      ? `<div class="answers"><button class="btn bad" id="no">✗ Nicht gewusst</button><button class="btn good" id="yes">✓ Gewusst</button></div>`
+      : "";
+    if(s.flipped){
+      document.getElementById("no").onclick = () => answer(false);
+      document.getElementById("yes").onclick = () => answer(true);
+    }
+  }
+  function flip(){
+    if(s.flipped) return;
+    s.flipped = true; card.classList.add("flipped"); showControls();
+    if(!askEn) speak(w.en);
+  }
+  card.onclick = e => { if(e.target.closest(".speak")) return; flip(); };
+  card.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); } };
+  app.querySelectorAll(".speak").forEach(b => b.onclick = e => { e.stopPropagation(); speak(w.en); });
+  showControls();
+}
+
+/* Gemeinsamer Rahmen für Eintippen, Auswahl, Buchstabensalat und Frosch-Sprung */
+function renderChallenge(head, w){
+  const s = ui.session, askEn = s.dir === "ende";
+  const prompt = promptOf(w, s.dir), ans = answerOf(w, s.dir);
+  const st = s.state || (s.state = makeState(s.type, w, s.dir));
+  app.innerHTML = head + `
+    <div class="mini-card paper ${s.type === "climb" || s.type === "pipes" ? "compact" : ""}">
+      <div class="lang">${askEn ? "🇬🇧 Englisch" : "🇩🇪 Deutsch"} <span class="muted" style="font-weight:600">→ ${askEn ? "🇩🇪 Deutsch" : "🇬🇧 Englisch"}</span></div>
+      ${askEn ? '<button class="speak" id="say" aria-label="Vorlesen">🔊</button>' : ""}
+      <div class="word">${esc(prompt)}</div>
+    </div>
+    <div id="task"></div>
+    <div id="feedback" aria-live="polite"></div>
+  `;
+  const say = document.getElementById("say"); if(say) say.onclick = () => speak(w.en);
+  const task = document.getElementById("task"), fb = document.getElementById("feedback");
+
+  function done(right, given){
+    if(st.finished) return;
+    st.finished = true;
+    if(!askEn) speak(w.en);
+    if(right){
+      fb.innerHTML = `<div class="verdict good">✓ Richtig!${given && simple(given) !== simple(ans) ? ` Ganz genau: <strong>${esc(ans)}</strong>` : ""}</div>`;
+      setTimeout(() => answer(true), st.delay || 900);
+    } else {
+      fb.innerHTML = `<div class="verdict bad">Richtig wäre: <strong>${esc(ans)}</strong></div>
+        <button class="btn" id="goOn">Weiter</button>`;
+      document.getElementById("goOn").onclick = () => answer(false);
+      document.getElementById("goOn").focus();
+    }
+  }
+
+  if(s.type === "typing"){
+    task.innerHTML = `
+      <input type="text" id="typed" class="typed" placeholder="Übersetzung eintippen" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Übersetzung">
+      <div class="answers" style="margin-top:10px">
+        <button class="btn ghost" id="dunno">Weiß ich nicht</button>
+        <button class="btn" id="check">Prüfen</button>
+      </div>`;
+    const inp = document.getElementById("typed");
+    const check = () => { if(st.finished) return; const v = inp.value; if(!v.trim()) { inp.focus(); return; }
+      const ok = isCorrect(v, ans); inp.classList.add(ok ? "ok" : "no"); inp.readOnly = true;
+      task.querySelector(".answers").remove(); done(ok, v); };
+    inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); check(); } });
+    document.getElementById("check").onclick = check;
+    document.getElementById("dunno").onclick = () => { inp.readOnly = true; task.querySelector(".answers").remove(); done(false); };
+    setTimeout(() => inp.focus(), 50);
+  }
+
+  if(s.type === "choice"){
+    task.innerHTML = `<div class="choices">${st.options.map((o, i) => `<button class="choice" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
+    task.querySelectorAll(".choice").forEach(b => b.onclick = () => {
+      if(st.finished) return;
+      const pickText = st.options[+b.dataset.i], ok = pickText === ans;
+      task.querySelectorAll(".choice").forEach(x => { x.disabled = true; if(st.options[+x.dataset.i] === ans) x.classList.add("right"); });
+      if(!ok) b.classList.add("wrong");
+      done(ok);
+    });
+  }
+
+  if(s.type === "scramble"){
+    const drawScramble = () => {
+      let k = 0;
+      const slots = st.target.map(ch => ch === " " ? '<span class="gap"></span>' : `<span class="slot ${st.picked[k] !== undefined ? "filled" : ""}">${st.picked[k] !== undefined ? esc(st.tiles[st.picked[k++]]) : (k++, "")}</span>`).join("");
+      task.innerHTML = `
+        <div class="slots" id="slots">${slots}</div>
+        <div class="tiles">${st.tiles.map((t, i) => `<button class="tile" data-i="${i}" ${st.picked.includes(i) ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+        ${st.finished ? "" : `<div class="answers" style="margin-top:12px"><button class="btn ghost" id="undo" ${st.picked.length ? "" : "disabled"}>⌫ Zurück</button><button class="btn ghost" id="dunno">Weiß ich nicht</button></div>`}`;
+      task.querySelectorAll(".tile").forEach(b => b.onclick = () => {
+        if(st.finished) return;
+        st.picked.push(+b.dataset.i);
+        if(st.picked.length === st.letters.length){
+          const built = st.picked.map(i => st.tiles[i]).join("");
+          const ok = built.toLowerCase() === st.letters.join("").toLowerCase();
+          drawScramble();
+          document.getElementById("slots").classList.add(ok ? "ok" : "no");
+          task.querySelector(".answers")?.remove();
+          done(ok);
+        } else drawScramble();
+      });
+      const undo = document.getElementById("undo"); if(undo) undo.onclick = () => { st.picked.pop(); drawScramble(); };
+      const dn = document.getElementById("dunno"); if(dn) dn.onclick = () => { task.querySelector(".answers")?.remove(); done(false); };
+    };
+    drawScramble();
+  }
+
+  if(s.type === "pipes"){
+    st.delay = 1600;
+    task.innerHTML = `<div class="pipes-wrap">${pipesSVG(st)}</div>
+      <p class="muted" style="text-align:center;margin:8px 0 0">Welcher Wasserhahn führt zum richtigen Wort? Tippe ihn an!</p>`;
+    runPipes(st, ans, ok => done(ok));
+  }
+  if(s.type === "climb"){
+    st.delay = 1500;
+    task.innerHTML = `
+      <div class="climb-wrap">
+        <canvas id="climb" aria-label="Spring nach oben auf die Plattform mit der richtigen Übersetzung"></canvas>
+      </div>
+      <div class="pad-ctrl">
+        <button class="ctl" id="cLeft" aria-label="Nach links">◀</button>
+        <button class="ctl" id="cRight" aria-label="Nach rechts">▶</button>
+        <button class="ctl jump" id="cJump" aria-label="Springen">⤒ Springen</button>
+      </div>`;
+    startClimb(st, ans, (ok) => done(ok));
+  }
+
+  if(s.type === "frog"){
+    task.innerHTML = `
+      <div class="pond" id="pond">
+        <div class="ripple r1"></div><div class="ripple r2"></div>
+        ${st.options.map((o, i) => `<button class="pad p${i}" data-i="${i}"><span>${esc(o)}</span></button>`).join("")}
+        <div class="start-pad"></div>
+        <div class="frog" id="frog" aria-hidden="true">🐸</div>
+      </div>
+      <p class="muted" style="text-align:center;margin:8px 0 0">Tippe auf das richtige Seerosenblatt, dann springt der Frosch!</p>`;
+    const pond = document.getElementById("pond"), frog = document.getElementById("frog");
+    task.querySelectorAll(".pad").forEach(b => b.onclick = () => {
+      if(st.finished || st.jumping) return;
+      st.jumping = true;
+      const ok = st.options[+b.dataset.i] === ans;
+      const pr = pond.getBoundingClientRect(), fr = frog.getBoundingClientRect(), br = b.getBoundingClientRect();
+      frog.style.setProperty("--dx", (br.left + br.width / 2 - (fr.left + fr.width / 2)) + "px");
+      frog.style.setProperty("--dy", (br.top + br.height / 2 - (fr.top + fr.height / 2) - 14) + "px");
+      frog.classList.add("hop");
+      task.querySelectorAll(".pad").forEach(x => x.disabled = true);
+      setTimeout(() => {
+        if(ok){ b.classList.add("right"); frog.classList.add("happy"); }
+        else {
+          b.classList.add("sink"); frog.classList.add("splash");
+          const sp = document.createElement("div"); sp.className = "splashfx"; sp.textContent = "💦";
+          sp.style.left = (br.left - pr.left + br.width / 2) + "px"; sp.style.top = (br.top - pr.top + br.height / 2) + "px";
+          pond.appendChild(sp);
+          task.querySelectorAll(".pad").forEach(x => { if(st.options[+x.dataset.i] === ans) x.classList.add("right"); });
+        }
+        done(ok);
+      }, 620);
+    });
+  }
+}
+
+function makeState(type, w, dir){
+  const ans = answerOf(w, dir);
+  if(type === "choice") return { options: shuffle([ans, ...distractors(w, dir, 3)]) };
+  if(type === "pipes") return Object.assign({ options: shuffle([ans, ...distractors(w, dir, 2)]) }, makePipes());
+  if(type === "climb") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
+  if(type === "frog") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
+  if(type === "scramble"){
+    const target = [...ans];
+    const letters = target.filter(c => c !== " ").map(c => c.toLowerCase()); // Kleinbuchstaben, damit der erste Buchstabe nichts verrät
+    let tiles = shuffle(letters), n = 0;
+    while(tiles.join("") === letters.join("") && n++ < 10) tiles = shuffle(letters);
+    return { target, letters, tiles, picked: [] };
+  }
+  return {};
+}
+
+function answer(knew){
+  if(ui.busy) return;
+  const s = ui.session, g = group(ui.groupId), stack = stackOf(g);
+  const id = stack.shift(), w = wordById(id);
+  if(s.mode !== "normal"){
+    if(!w.ml) w.ml = {};
+    w.ml[s.mode] = knew ? Math.min(5, (w.ml[s.mode] || 0) + 1) : 0;
+  }
+  let label;
+  if(knew){
+    w.level[s.dir] = Math.min(5, w.level[s.dir] + 1);
+    if(!s.missed.has(id)) s.firstTry++;
+    s.done++;
+    label = "✓ Weit nach hinten gelegt";
+  } else {
+    w.level[s.dir] = 0;
+    s.missed.add(id);
+    label = "🔁 Kommt gleich wieder";
+  }
+  const pos = sortBackPosition(w.level[s.dir], stack.length);
+  stack.splice(pos, 0, id);
+  save();
+
+  const top = document.getElementById("top");
+  const next = () => {
+    ui.busy = false;
+    if(s.done >= s.target) return finish();
+    pickDir();
+    renderLearn(false);
+    window.scrollTo(0,0);
+  };
+  if(!top){ next(); return; }
+  ui.busy = true;
+  document.getElementById("controls").innerHTML = `<div class="sorted" aria-live="polite">${label}</div>`;
+  top.classList.remove("enter");
+  top.classList.add(knew ? "away-far" : "away-near");
+  setTimeout(next, 420);
+}
+
+function finish(){
+  const s = ui.session;
+  const g = group(ui.groupId);
+  const ratio = s.target ? s.firstTry / s.target : 0;
+  const base = starsForRound(ratio);
+  const bonus = ratio >= .6 ? modeOf(s.mode).bonus : 0;
+  const coinBonus = Math.min(2, Math.floor((s.coins || 0) / 10));
+  const stars = base + bonus + coinBonus;
+  const before = trophies(g);
+  g.stars += stars;
+  const medals = checkMedals(g, s.mode);
+  const newTrophy = trophies(g) > before;
+  save();
+  ui.result = { total: s.target, firstTry: s.firstTry, missed: [...s.missed], stars: base, bonus, coins: s.coins || 0, coinBonus, medals, newTrophy, mode: s.mode };
+  ui.session = null;
+  go("#ergebnis", true);
+}
+
+function renderResult(){
+  const r = ui.result;
+  const missed = r.missed.map(wordById).filter(Boolean);
+  const ratio = r.total ? r.firstTry / r.total : 0;
+  const face = ratio === 1 ? "🎉" : ratio >= .7 ? "😃" : ratio >= .4 ? "🙂" : "💪";
+  const line = ratio === 1 ? "Alles gewusst. Super!" : ratio >= .7 ? "Sehr gut gemacht!" : ratio >= .4 ? "Gut geübt!" : "Dranbleiben, das wird!";
+  app.innerHTML = `
+    <div class="result">
+      <div class="stars-won" aria-label="${r.stars} von 3 Sternen">${[1,2,3].map(i => `<span class="${i <= r.stars ? "" : "award-off"}">⭐</span>`).join("")}</div>
+      <h1>Runde geschafft! ${face}</h1>
+      <p style="font-size:1.2rem">${r.firstTry} von ${r.total} beim ersten Mal gewusst.</p>
+      <p class="muted">${line} +${r.stars} ⭐</p>
+      ${r.coins ? `<p class="bonus">🪙 ${r.coins} ${r.coins === 1 ? "Münze" : "Münzen"} gesammelt${r.coinBonus ? `: +${r.coinBonus} ⭐` : ""}</p>` : ""}
+      ${r.bonus ? `<p class="bonus">${modeOf(r.mode).icon} ${modeOf(r.mode).name}-Bonus: +${r.bonus} ⭐</p>` : ""}
+    </div>
+    ${r.medals.map(x => `<div class="new-award big-${x.mode.key}"><span class="icon">${x.medal.icon}</span><span>Neue ${x.mode.name}-${x.medal.name}-Medaille! ${x.mode.icon}</span></div>`).join("")}
+    ${r.newTrophy ? `<div class="new-award"><span class="icon">🏆</span><span>Neuer Pokal! Du hast ${group(ui.groupId).stars} Sterne gesammelt.</span></div>` : ""}
+    ${missed.length ? `<section class="panel missed">
+      <h2 style="margin-top:0">Diese Karten liegen weiter vorne im Stapel</h2>
+      <ul class="words">${missed.map(w => `<li><button tabindex="-1" style="cursor:default"><span class="dot" style="background:var(--b1)"></span><span class="pair"><span class="en">${esc(w.en)}</span> <span class="de">– ${esc(w.de)}</span></span></button></li>`).join("")}</ul>
+    </section>` : ""}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <button class="btn" id="again">▶ Noch eine Runde</button>
+      <button class="btn ghost" id="toGroup">Zur Gruppe</button>
+    </div>
+  `;
+  document.getElementById("again").onclick = () => { ui.result = null; history.replaceState(null, "", "#gruppe"); startSession(); };
+  document.getElementById("toGroup").onclick = () => { ui.result = null; go("#gruppe", true); };
+  window.scrollTo(0,0);
+}
+
+function speak(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-GB"; u.rate = .9;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- Liste einfügen ---------- */
+const DE_WORDS = new Set("der die das den dem des ein eine einen einem einer und oder nicht mit auf für von zu ist sind sein haben werden etwas jemand jdn jdm jds etw sich man auch sehr kein keine".split(" "));
+const EN_WORDS = new Set("the a an to of and or not with on for from is are be have get something somebody someone sb sth very no".split(" "));
+const IPA = /[ˈˌəɪʊæɒʌɔːθðŋʃʒɜɑ]/;
+
+function cleanLines(text){
+  return String(text || "").split(/\r?\n/).map(l => {
+    l = l.replace(/\[[^\]]*\]/g, m => IPA.test(m) ? " " : m)
+         .replace(/\/[^\/\n]{1,40}\//g, m => IPA.test(m) ? " " : m)
+         .replace(/^\s*[•·▪*]\s*/, "")
+         .replace(/\s+([–—=→|-])\s+/g, " $1 ")
+         .replace(/\s+$/,"").replace(/^\s+/,"");
+    return l;
+  }).filter(l => l && !/^[\d\s.,;:!?()\-–—]*$/.test(l));
+}
+function langScore(t){ // > 0 eher Englisch, < 0 eher Deutsch
+  let s = 0;
+  if(/[äöüß]/i.test(t)) s -= 4;
+  t.split(/[\s,()]+/).filter(Boolean).forEach(w => {
+    const lw = w.toLowerCase().replace(/[.!?;:]/g, "");
+    if(DE_WORDS.has(lw)) s -= 2;
+    if(EN_WORDS.has(lw)) s += 2;
+    if(/^[A-ZÄÖÜ][a-zäöüß]/.test(w) && w !== "I") s -= 1;
+    if(/th|wh|ing$|ight|ea|oo|y$|ou/.test(lw)) s += .7;
+    if(/sch|tz|ung$|keit$|heit$|chen$|lich$|ei/.test(lw)) s -= .7;
+    if(/c(?![hk])/.test(lw)) s += .5;
+  });
+  return s;
+}
+const sum = a => a.reduce((x,y) => x + y, 0);
+const SEP = /\t|\s[–—-]\s|\s*=\s*|\s*;\s*|\s*\|\s*|\s*→\s*|\s*:\s+|\s{2,}/;
+
+function bestRowSplit(line, orient){
+  const w = line.split(/\s+/);
+  if(w.length < 2) return [line, ""];
+  let best = null, bestV = -Infinity;
+  for(let i = 1; i < w.length; i++){
+    const a = w.slice(0, i).join(" "), b = w.slice(i).join(" ");
+    let v = orient * (langScore(a) - langScore(b));
+    const lastLeft = w[i-1].toLowerCase();
+    if(EN_WORDS.has(lastLeft) || DE_WORDS.has(lastLeft)) v -= 3; // „to | go“ oder „das | Wetter“ nicht trennen
+    if(v > bestV){ bestV = v; best = [a, b]; }
+  }
+  return best;
+}
+function orientPairs(left, right){
+  const d = sum(left.map(langScore)) - sum(right.map(langScore));
+  return d >= 0 ? { en:left, de:right, swapped:false } : { en:right, de:left, swapped:true };
+}
+function parseOne(text){
+  const lines = cleanLines(text);
+  if(!lines.length) return null;
+  const withSep = lines.filter(l => SEP.test(l)).length;
+  if(withSep >= lines.length * .6){
+    const L = [], R = [];
+    lines.forEach(l => {
+      const m = l.match(SEP);
+      if(m){ L.push(l.slice(0, m.index).trim()); R.push(l.slice(m.index + m[0].length).replace(/^[–—=:;|→\s-]+/, "").trim()); }
+      else { const p = bestRowSplit(l, 1); L.push(p[0]); R.push(p[1]); }
+    });
+    return Object.assign(orientPairs(L, R), { how:"sep" });
+  }
+  const multi = lines.filter(l => /\s/.test(l)).length;
+  if(multi < lines.length * .5 && lines.length >= 2){
+    // Spalten wurden nacheinander kopiert: erst alle Wörter der einen, dann der anderen Sprache
+    const n = lines.length, sc = lines.map(langScore);
+    let bestK = Math.ceil(n / 2), bestV = -Infinity;
+    for(let k = 1; k < n; k++){
+      const v = Math.abs(sum(sc.slice(0, k)) - sum(sc.slice(k))) - Math.abs(k - n / 2) * .3;
+      if(v > bestV){ bestV = v; bestK = k; }
+    }
+    if(bestV < 2) bestK = Math.ceil(n / 2);
+    return Object.assign(orientPairs(lines.slice(0, bestK), lines.slice(bestK)), { how:"col" });
+  }
+  // Jede Zeile enthält ein Paar ohne Trennzeichen
+  const tries = [1, -1].map(o => {
+    const p = lines.map(l => bestRowSplit(l, o));
+    return { o, p, v: sum(p.map(([a,b]) => o * (langScore(a) - langScore(b)))) };
+  });
+  const t = tries[0].v >= tries[1].v ? tries[0] : tries[1];
+  const L = t.p.map(x => x[0]), R = t.p.map(x => x[1]);
+  return t.o === 1 ? { en:L, de:R, swapped:false, how:"row" } : { en:R, de:L, swapped:true, how:"row" };
+}
+function parseTwo(enText, deText){
+  const a = cleanLines(enText), b = cleanLines(deText);
+  if(!a.length && !b.length) return null;
+  return Object.assign(orientPairs(a, b), { how:"two" });
+}
+
+function renderImport(){
+  const imp = ui.imp, g = group(ui.groupId);
+  if(imp.preview) return renderPreview();
+  app.innerHTML = `
+    <div class="topbar"><button class="back" id="back">‹ ${esc(g.name)}</button></div>
+    <h1>Liste einfügen</h1>
+    <ol class="steps">
+      <li>Öffne Google Lens oder die Kamera und fotografiere die Vokabelseite.</li>
+      <li>Markiere die Wörter und tippe auf „Kopieren“.</li>
+      <li>Füge den Text hier ein. Die App ordnet die Paare selbst zu.</li>
+    </ol>
+    <section class="panel">
+      <div class="seg" role="group" aria-label="Art der Liste" style="grid-template-columns:1fr 1fr">
+        <button data-mode="one" aria-pressed="${imp.mode === "one"}">Ein Feld</button>
+        <button data-mode="two" aria-pressed="${imp.mode === "two"}">Zwei Spalten</button>
+      </div>
+      ${imp.mode === "one" ? `
+        <label class="field"><span>Ganze Liste</span>
+          <textarea id="t" placeholder="dog – Hund&#10;cat – Katze&#10;to go – gehen">${esc(imp.text)}</textarea></label>
+      ` : `
+        <p class="muted" style="font-size:.95rem;margin-bottom:10px">Kopiere zuerst nur die englische, dann nur die deutsche Spalte. Zeile 1 gehört zu Zeile 1.</p>
+        <label class="field"><span>🇬🇧 Englische Spalte</span>
+          <textarea class="half" id="tEn" placeholder="dog&#10;cat&#10;to go" autocapitalize="none" spellcheck="false">${esc(imp.enText)}</textarea></label>
+        <label class="field"><span>🇩🇪 Deutsche Spalte</span>
+          <textarea class="half" id="tDe" placeholder="Hund&#10;Katze&#10;gehen">${esc(imp.deText)}</textarea></label>
+      `}
+      <div class="msg" id="imsg" aria-live="polite"></div>
+      <button class="btn" id="next">Weiter zur Vorschau</button>
+    </section>
+  `;
+  const keep = () => {
+    const t = document.getElementById("t"), a = document.getElementById("tEn"), b = document.getElementById("tDe");
+    if(t) imp.text = t.value;
+    if(a) imp.enText = a.value;
+    if(b) imp.deText = b.value;
+  };
+  document.getElementById("back").onclick = () => { ui.imp = null; go("#gruppe", true); };
+  app.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { keep(); imp.mode = b.dataset.mode; renderImport(); });
+  document.getElementById("next").onclick = () => {
+    keep();
+    const p = imp.mode === "one" ? parseOne(imp.text) : parseTwo(imp.enText, imp.deText);
+    if(!p || (!p.en.length && !p.de.length)){
+      const m = document.getElementById("imsg");
+      m.textContent = "Füge zuerst eine Liste ein."; m.className = "msg err"; return;
+    }
+    imp.preview = p;
+    renderImport();
+  };
+  window.scrollTo(0,0);
+}
+
+function renderPreview(){
+  const imp = ui.imp, p = imp.preview, g = group(ui.groupId);
+  const existing = new Set(wordsOf(g.id).map(w => w.en.toLowerCase()));
+  const rows = Math.max(p.en.length, p.de.length);
+  const mismatch = p.en.length !== p.de.length;
+  app.innerHTML = `
+    <div class="topbar"><button class="back" id="back">‹ Liste ändern</button></div>
+    <h1>Vorschau</h1>
+    <p class="muted">Prüfe die Paare. Tippe in ein Feld, um es zu korrigieren.</p>
+    ${p.how === "photo" ? `<div class="note info">📷 Vom Foto gelesen. Bitte kurz prüfen, ob alles stimmt.</div>` : ""}
+    ${p.swapped ? `<div class="note info">Links stand Deutsch. Die App hat die Spalten getauscht.</div>` : ""}
+    ${mismatch ? `<div class="note warn">${plural(p.en.length, "englische", "englische")}, aber ${plural(p.de.length, "deutsche", "deutsche")} Zeilen. Bitte prüfen, ab wo die Paare verrutscht sind. Mit ⋯ kannst du Zeilen verbinden oder löschen.</div>` : ""}
+    <div class="pbar"><button class="btn ghost small" id="swap">⇄ Spalten tauschen</button></div>
+    <section class="panel" style="padding:12px">
+      <div class="phead"><span></span><span>🇬🇧 Englisch</span><span>🇩🇪 Deutsch</span><span></span></div>
+      ${Array.from({ length: rows }, (_, i) => {
+        const en = p.en[i] ?? "", de = p.de[i] ?? "";
+        const dupe = en && existing.has(en.trim().toLowerCase());
+        return `<div class="prow ${dupe ? "dupe" : ""}">
+          <span class="pn">${i + 1}</span>
+          <input type="text" data-c="en" data-i="${i}" value="${esc(en)}" class="${en.trim() ? "" : "missing"}" autocapitalize="none" spellcheck="false" aria-label="Englisch Zeile ${i+1}">
+          <input type="text" data-c="de" data-i="${i}" value="${esc(de)}" class="${de.trim() ? "" : "missing"}" aria-label="Deutsch Zeile ${i+1}">
+          <button class="pmore" data-i="${i}" aria-label="Zeile ${i+1} bearbeiten">⋯</button>
+        </div>${dupe ? `<p class="goal" style="margin:-4px 0 8px 2.2em">„${esc(en)}“ ist schon in der Gruppe und wird übersprungen.</p>` : ""}`;
+      }).join("")}
+    </section>
+    <button class="btn" id="saveAll"></button>
+  `;
+  const saveBtn = document.getElementById("saveAll");
+  const valid = () => {
+    const seen = new Set(existing), out = [];
+    const rows = Math.max(p.en.length, p.de.length);
+    for(let i = 0; i < rows; i++){
+      const en = norm(p.en[i] || ""), de = norm(p.de[i] || "");
+      if(!en || !de || seen.has(en.toLowerCase())) continue;
+      seen.add(en.toLowerCase()); out.push({ en, de });
+    }
+    return out;
+  };
+  const updateBtn = () => {
+    const n = valid().length;
+    saveBtn.textContent = n ? `✓ ${plural(n, "Karte", "Karten")} speichern` : "Keine vollständigen Paare";
+    saveBtn.disabled = !n;
+  };
+  updateBtn();
+  app.querySelectorAll(".prow input").forEach(inp => inp.addEventListener("input", () => {
+    const arr = p[inp.dataset.c], i = +inp.dataset.i;
+    while(arr.length <= i) arr.push("");
+    arr[i] = inp.value;
+    inp.classList.toggle("missing", !inp.value.trim());
+    updateBtn();
+  }));
+  document.getElementById("back").onclick = () => { imp.preview = null; renderImport(); };
+  document.getElementById("swap").onclick = () => { [p.en, p.de] = [p.de, p.en]; p.swapped = false; renderPreview(); };
+  app.querySelectorAll(".pmore").forEach(b => b.onclick = async () => {
+    const i = +b.dataset.i, last = i >= rows - 1;
+    const label = `Zeile ${i + 1}: ${(p.en[i] || "…")} – ${(p.de[i] || "…")}`;
+    const opts = [
+      { value:"row", label:"Ganze Zeile löschen" },
+      { value:"en", label:"Nur Englisch löschen, Rest rutscht hoch" },
+      { value:"de", label:"Nur Deutsch löschen, Rest rutscht hoch" }
+    ];
+    if(!last){
+      opts.push({ value:"joinEn", label:"Englisch mit nächster Zeile verbinden" });
+      opts.push({ value:"joinDe", label:"Deutsch mit nächster Zeile verbinden" });
+    }
+    const c = await choose("Zeile bearbeiten", label, opts);
+    if(!c) return;
+    const sY = window.scrollY;
+    if(c === "row"){ p.en.splice(i, 1); p.de.splice(i, 1); }
+    if(c === "en") p.en.splice(i, 1);
+    if(c === "de") p.de.splice(i, 1);
+    if(c === "joinEn" && i + 1 < p.en.length){ p.en[i] = norm((p.en[i] || "") + " " + p.en[i+1]); p.en.splice(i + 1, 1); }
+    if(c === "joinDe" && i + 1 < p.de.length){ p.de[i] = norm((p.de[i] || "") + " " + p.de[i+1]); p.de.splice(i + 1, 1); }
+    while(p.en.length && !norm(p.en[p.en.length-1] || "") && !norm(p.de[p.en.length-1] || "") && p.en.length >= p.de.length){ p.en.pop(); if(p.de.length > p.en.length) p.de.pop(); }
+    renderPreview();
+    window.scrollTo(0, sY);
+  });
+  saveBtn.onclick = () => {
+    const list = valid();
+    if(!list.length) return;
+    const stack = stackOf(g), now = Date.now();
+    const newIds = list.map((x, k) => {
+      const w = { id: uid(), groupId: g.id, en: x.en, de: x.de, level: { ende:0, deen:0 }, created: now + k };
+      S.words.push(w); return w.id;
+    });
+    g.order = newIds.concat(stack.filter(id => !newIds.includes(id)));
+    save();
+    ui.imp = null;
+    ui.flash = `${plural(list.length, "Karte", "Karten")} gespeichert.`;
+    ui.editMode = true;
+    go("#gruppe", true);
+  };
+  window.scrollTo(0,0);
+}
+
+/* ---------- Sicherung ---------- */
+function renderBackup(){
+  app.innerHTML = banner() + `
+    <div class="topbar"><button class="back" id="back">‹ Gruppen</button></div>
+    <h1>💾 Sicherung</h1>
+    <p class="muted">Speichert alle Gruppen, Karten, Sterne und Pokale in einer Datei. So geht nichts verloren, auch nicht bei einem neuen Handy.</p>
+    <section class="panel">
+      <p class="goal" style="margin-top:0">${S.lastBackup ? "Letzte Sicherung: " + new Date(S.lastBackup).toLocaleDateString("de-DE", {day:"numeric", month:"long", year:"numeric"}) : "Noch keine Sicherung gespeichert."}</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <button class="btn" id="exp">💾 Sicherung speichern</button>
+        <button class="btn ghost" id="imp">📂 Sicherung laden</button>
+      </div>
+      <input type="file" id="impFile" accept=".json,application/json" hidden>
+      <div class="msg" id="bmsg" aria-live="polite"></div>
+    </section>
+  `;
+  const bmsg = document.getElementById("bmsg");
+  if(ui.backupMsg){ bmsg.textContent = ui.backupMsg.text; bmsg.className = "msg " + ui.backupMsg.kind; ui.backupMsg = null; }
+  document.getElementById("back").onclick = () => go("#start");
+  document.getElementById("exp").onclick = e => exportBackup(e.currentTarget, bmsg);
+  const file = document.getElementById("impFile");
+  document.getElementById("imp").onclick = () => file.click();
+  file.onchange = () => { if(file.files[0]) importBackup(file.files[0], bmsg); file.value = ""; };
+  window.scrollTo(0,0);
+}
+async function exportBackup(btn, msg){
+  const data = JSON.stringify({ app:"wortschatzkiste", version:2, exported:new Date().toISOString(), data:S });
+  const filename = "wortschatzkiste-sicherung-" + new Date().toISOString().slice(0,10) + ".json";
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Wird vorbereitet …";
+  let dl = null;
+  try{ if(window.claude && typeof window.claude.use === "function") dl = await window.claude.use("downloads"); }catch(e){ dl = null; }
+  try{
+    if(dl){
+      await dl.save({ filename, data });
+    } else {
+      const url = URL.createObjectURL(new Blob([data], { type:"application/json" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+    }
+    S.lastBackup = Date.now(); save();
+    ui.backupMsg = { kind:"ok", text:`Sicherung „${filename}“ gespeichert. Du findest sie im Ordner „Downloads“.` };
+    renderBackup();
+  }catch(e){
+    btn.disabled = false; btn.textContent = label;
+    const code = e && e.code;
+    msg.textContent = code === "declined" ? "Sicherung abgebrochen." : code === "rate_limited" ? "Bitte kurz warten und noch einmal tippen." : "Die Sicherung konnte hier nicht gespeichert werden.";
+    msg.className = "msg err";
+  }
+}
+
+function importBackup(file, msg){
+  const r = new FileReader();
+  r.onerror = () => { msg.textContent = "Die Datei konnte nicht gelesen werden."; msg.className = "msg err"; };
+  r.onload = async () => {
+    let d;
+    try{
+      const o = JSON.parse(r.result);
+      d = o && o.app === "wortschatzkiste" && o.data ? o.data : null;
+      if(!d || !Array.isArray(d.groups) || !Array.isArray(d.words)) throw 0;
+      d = migrate(d);
+    }catch(e){
+      msg.textContent = "Das ist keine Sicherung der Wortschatzkiste."; msg.className = "msg err"; return;
+    }
+    const known = new Set(S.groups.map(g => g.id));
+    const fresh = d.groups.filter(g => !known.has(g.id));
+    const c = await choose("Sicherung laden",
+      `In der Datei: ${plural(d.groups.length, "Gruppe", "Gruppen")} mit ${plural(d.words.length, "Karte", "Karten")}.`,
+      [
+        { value:"merge", label: fresh.length ? `${plural(fresh.length, "neue Gruppe", "neue Gruppen")} dazunehmen` : "Nichts Neues zum Dazunehmen", primary:true },
+        { value:"replace", label:"Alles hier ersetzen", danger:true }
+      ]);
+    if(!c) return;
+    if(c === "replace"){
+      if(S.groups.length){
+        const ok = await choose("Wirklich ersetzen?", "Alle Gruppen und Karten auf diesem Handy werden durch die Sicherung ersetzt.", [{ value:"yes", label:"Ja, ersetzen", danger:true }]);
+        if(!ok) return;
+      }
+      const last = S.lastBackup;
+      S = d; if(last && !S.lastBackup) S.lastBackup = last;
+      save();
+      ui.backupMsg = { kind:"ok", text:`${plural(S.groups.length, "Gruppe", "Gruppen")} geladen.` };
+    } else {
+      const ids = new Set(fresh.map(g => g.id));
+      S.groups.push(...fresh);
+      S.words.push(...d.words.filter(w => ids.has(w.groupId)));
+      save();
+      ui.backupMsg = fresh.length
+        ? { kind:"ok", text:`${plural(fresh.length, "Gruppe", "Gruppen")} dazugenommen.` }
+        : { kind:"ok", text:"Alle Gruppen aus der Sicherung sind schon da." };
+    }
+    renderBackup();
+  };
+  r.readAsText(file);
+}
+
+/* ---------- Dialog ---------- */
+function ask(opt){
+  return new Promise(resolve => {
+    dlg.innerHTML = `<form method="dialog">
+      <h3>${esc(opt.title)}</h3>
+      ${opt.text ? `<p class="muted">${esc(opt.text)}</p>` : ""}
+      ${(opt.fields||[]).map(f => `<label class="field"><span>${esc(f.label)}</span>
+        <input type="text" name="${f.name}" value="${esc(f.value||"")}" placeholder="${esc(f.placeholder||"")}" autocomplete="off"></label>`).join("")}
+      <div class="dlg-actions">
+        <button class="btn ${opt.danger ? "bad" : ""}" value="ok">${esc(opt.ok)}</button>
+        ${opt.extra ? `<button class="btn ghost" value="extra" style="color:var(--bad)">${esc(opt.extra)}</button>` : ""}
+        <button class="btn ghost" value="cancel" formnovalidate>Abbrechen</button>
+      </div></form>`;
+    const form = dlg.querySelector("form");
+    let choice = "cancel";
+    form.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { choice = b.value; }));
+    form.addEventListener("submit", e => { if(e.submitter && e.submitter.value) choice = e.submitter.value; });
+    dlg.onclose = () => {
+      if(choice === "extra") return resolve("extra");
+      if(choice !== "ok") return resolve(null);
+      const out = {};
+      form.querySelectorAll("input").forEach(i => out[i.name] = i.value);
+      resolve(out);
+    };
+    dlg.showModal();
+    const first = form.querySelector("input");
+    if(first){ first.focus(); first.select(); }
+  });
+}
+
+function choose(title, text, options){
+  return new Promise(resolve => {
+    dlg.innerHTML = `<form method="dialog">
+      <h3>${esc(title)}</h3>
+      ${text ? `<p class="muted">${esc(text)}</p>` : ""}
+      <div class="dlg-actions">
+        ${options.map(o => `<button class="btn ${o.primary ? "" : "ghost"}" value="${o.value}" ${o.danger ? 'style="color:var(--bad)"' : ""}>${esc(o.label)}</button>`).join("")}
+        <button class="btn ghost" value="cancel">Abbrechen</button>
+      </div></form>`;
+    let choice = "cancel";
+    dlg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { choice = b.value; }));
+    dlg.onclose = () => resolve(choice === "cancel" ? null : choice);
+    dlg.showModal();
+  });
+}
+
+render();
+})();
+
+</script>
+<script>
+// Offline-Modus: nur wenn die App über eine Internetadresse (https) läuft
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

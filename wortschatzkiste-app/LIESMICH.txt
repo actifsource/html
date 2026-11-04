@@ -1,0 +1,28 @@
+WORTSCHATZKISTE – App-Dateien
+==============================
+
+Inhalt
+  index.html              die App
+  manifest.webmanifest    Name, Farben und Symbol für die Installation
+  sw.js                   sorgt dafür, dass die App offline startet
+  icon-*.png              App-Symbole
+
+Wichtig vor dem Umzug
+  In der alten Version (claude.ai) auf 💾 tippen und „Sicherung speichern“.
+  In der neuen App auf 💾 tippen und „Sicherung laden“.
+  Die Daten werden pro Adresse gespeichert, darum ist die neue App zuerst leer.
+
+Als echte App installieren (empfohlen)
+  Alle Dateien zusammen auf einen Webspeicher mit https hochladen,
+  z. B. GitHub Pages, Netlify oder Cloudflare Pages.
+  Dann die Adresse in Chrome öffnen → ⋮ → „App installieren“
+  bzw. „Zum Startbildschirm hinzufügen“.
+
+Nur zum schnellen Ausprobieren
+  index.html aufs Handy kopieren und mit Chrome öffnen.
+  Dann gibt es keine Installation und keinen Offline-Speicher,
+  und die gespeicherten Daten sind nicht zuverlässig.
+
+Hinweis zur Fotoerkennung 📷
+  Sie funktioniert nur in der Version auf claude.ai.
+  In dieser Version stattdessen 📋 „Liste einfügen“ mit Google Lens nutzen.
