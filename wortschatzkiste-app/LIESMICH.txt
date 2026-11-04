@@ -6,6 +6,7 @@ Inhalt
   manifest.webmanifest    Name, Farben und Symbol für die Installation
   sw.js                   sorgt dafür, dass die App offline startet
   icon-*.png              App-Symbole
+  ocr/                    Texterkennung für Fotos (ca. 12 MB)
 
 Wichtig vor dem Umzug
   In der alten Version (claude.ai) auf 💾 tippen und „Sicherung speichern“.
@@ -23,6 +24,11 @@ Nur zum schnellen Ausprobieren
   Dann gibt es keine Installation und keinen Offline-Speicher,
   und die gespeicherten Daten sind nicht zuverlässig.
 
-Hinweis zur Fotoerkennung 📷
-  Sie funktioniert nur in der Version auf claude.ai.
-  In dieser Version stattdessen 📋 „Liste einfügen“ mit Google Lens nutzen.
+Fotoerkennung 📷
+  Der Ordner „ocr“ enthält die Texterkennung (Tesseract.js, Apache-2.0-Lizenz).
+  Er muss mit hochgeladen werden, und zwar als Ordner „ocr“ neben der index.html.
+  Beim ersten Foto braucht das Handy Internet, danach geht es auch offline.
+
+Update einer bestehenden Installation
+  index.html und sw.js ersetzen und den Ordner „ocr“ dazulegen.
+  Die App holt sich die neue Version beim nächsten Start mit Internet.
