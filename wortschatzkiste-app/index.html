@@ -112,6 +112,41 @@ input[type=text]{
 .hero-actions{display:flex; gap:10px}
 .backup-btn{min-width:52px; min-height:52px; font-size:1.5rem; border-radius:14px}
 
+/* Gruppen zusammen üben */
+.group-row{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:pan-y; position:relative}
+.swipe-wrap{position:relative; border-radius:18px}
+body{overflow-x:hidden}
+.swipe-bg{position:absolute; inset:0; border-radius:18px; background:var(--good); color:#fff; font-weight:800; font-size:1.05rem; display:flex; align-items:center; padding-left:20px; opacity:0}
+.swipe-bg.ready{background:color-mix(in srgb, var(--good) 80%, #000)}
+.mix-hint{margin:0; text-align:center; font-weight:700; color:var(--muted)}
+.group-row.selected{outline:4px solid var(--chalk); outline-offset:-2px; background:color-mix(in srgb, var(--chalk) 16%, var(--surface))}
+.group-row.disabled{opacity:.4}
+.sel-mark{flex:none; width:30px; height:30px; border-radius:50%; border:3px solid var(--line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; margin-right:8px; background:var(--surface)}
+.group-row.selected .sel-mark{background:var(--chalk); border-color:var(--chalk); color:var(--chalk-ink)}
+.row-head .name{flex:1; min-width:0}
+.mix-bar{position:fixed; left:0; right:0; bottom:0; z-index:30; max-width:560px; margin:0 auto; background:var(--surface); border-radius:22px 22px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.18); padding:14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); display:flex; flex-direction:column; gap:10px}
+.mix-bar .seg{margin:0}
+.mix-bar .seg button{font-size:.95rem}
+.mix-head{display:flex; justify-content:space-between; align-items:center; font-size:1.1rem}
+.mix-from{margin-bottom:6px}
+.tier .mix-lv{font-size:min(2rem, 8vw) !important; padding:4px 0}
+
+.lost-award{display:flex; align-items:center; gap:12px; background:var(--surface); border:2px dashed color-mix(in srgb, var(--bad) 60%, var(--surface)); border-radius:16px; padding:12px 16px; font-weight:700; margin:10px 0}
+.lost-award .icon{font-size:2.2rem; line-height:1}
+
+.verdict-btn{display:block; width:100%; border:0; font:inherit; font-size:1.15rem; font-weight:700; cursor:pointer}
+.verdict-next{display:inline-block; margin-left:8px; padding:2px 12px; border-radius:999px; background:rgba(255,255,255,.22)}
+.tap-guard #task, .tap-guard #feedback{pointer-events:none}
+
+.card-medal{flex:none; font-size:1.5rem; line-height:1; width:30px; text-align:center}
+
+.info-video{border-radius:18px; overflow:hidden; background:#000; box-shadow:var(--shadow); margin:10px 0 6px}
+.info-video video{display:block; width:100%; height:auto; max-height:60vh}
+.info-steps{margin:0; padding-left:1.4em; display:flex; flex-direction:column; gap:10px; line-height:1.35}
+
+/* Konfetti */
+canvas.confetti{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:50}
+
 /* Wasser-Weg */
 .pipes-wrap{background:#e8f2fb; border-radius:18px; padding:6px 4px 2px; box-shadow:var(--shadow)}
 #pipes{display:block; width:100%; height:auto; max-height:62vh; margin:0 auto; user-select:none; -webkit-user-select:none}
@@ -154,6 +189,17 @@ input[type=text]{
 
 /* Bearbeiten */
 .group-tools{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0 4px}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.lang-chip{font-size:1.3rem; padding:4px 14px}
+.group-tools .btn{font-size:.9rem; padding:6px 8px}
+.grade-chip{margin-top:10px; border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:6px 16px; font:inherit; font-size:1.05rem; font-weight:800; color:var(--ink); min-height:44px; box-shadow:var(--shadow)}
+.grade-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin:22px 0}
+.grade-btn{aspect-ratio:1; border:0; border-radius:22px; background:var(--surface); box-shadow:var(--shadow); font:inherit; color:var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px}
+.grade-btn b{font-size:2.6rem; line-height:1; font-weight:800}
+.grade-btn span{font-size:.95rem; color:var(--muted); font-weight:600}
+.grade-btn[aria-pressed="true"]{background:var(--chalk)}
+.grade-btn[aria-pressed="true"] span{color:var(--chalk-ink)}
+.grade-btn:active{transform:translateY(2px); box-shadow:none}
 .group-tools .btn{width:100%; background:var(--surface)}
 .cards-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
 .cards-head h2{margin:0; display:flex; align-items:center; gap:8px}
@@ -184,18 +230,23 @@ input[type=text]{
 .lv-icon{font-size:1.4rem}
 .level-desc{font-size:.9rem; color:var(--muted); margin:2px 2px 4px}
 .level-desc strong{color:var(--ink)}
-.medal-tiers{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; align-items:end; margin:8px 0 6px}
+.medal-tiers{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; align-items:end; margin:8px 0 6px}
 .tier{background:var(--surface); border:3px solid transparent; border-radius:14px; padding:5px 2px 4px; text-align:center; box-shadow:var(--shadow); font:inherit; color:inherit; min-width:0; overflow:hidden; cursor:pointer}
 .tier[aria-pressed="true"]{border-color:var(--chalk); background:color-mix(in srgb, var(--chalk) 22%, var(--surface))}
 .tier[aria-pressed="false"] .tier-name{opacity:.75}
 .tier:active{transform:translateY(2px)}
 .tier-medals{display:flex; justify-content:center; line-height:1.1; white-space:nowrap}
-.tier.t0 .tier-medals{font-size:min(1.25rem, 5vw)}
-.tier.t1 .tier-medals{font-size:min(1.6rem, 6vw)}
-.tier.t2 .tier-medals{font-size:min(2rem, 7vw)}
+.tier.t0 .tier-medals{font-size:min(1rem, 4vw)}
+.tier.t1 .tier-medals{font-size:min(1.2rem, 4.6vw)}
+.tier.t2 .tier-medals{font-size:min(1.4rem, 5.2vw)}
+.tier.t3 .tier-medals{font-size:min(1.65rem, 5.8vw)}
+.tier .tier-name{font-size:.7rem; white-space:normal; line-height:1.15; overflow:visible}
+.tier .tier-name .tn-icon{display:block; font-size:.95rem}
 .tier-name{font-size:.8rem; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.row-awards .mini.t0{font-size:.85em} .row-awards .mini.t1{font-size:1.05em} .row-awards .mini.t2{font-size:1.3em}
+.row-awards .mini.t0{font-size:.8em} .row-awards .mini.t1{font-size:.95em} .row-awards .mini.t2{font-size:1.1em} .row-awards .mini.t3{font-size:1.3em}
+.new-award.big-letters .icon{font-size:2.5rem}
 .new-award.big-tipp .icon{font-size:2.8rem}
+.tile.wrong{background:var(--bad); color:#fff; animation:shake .35s}
 .new-award.big-profi .icon{font-size:3.4rem}
 
 /* Profi-Modus */
@@ -293,7 +344,7 @@ textarea.half{min-height:150px}
 .award-off{filter:grayscale(1); opacity:.28}
 .goal{font-size:.95rem; color:var(--muted); margin:2px 0}
 .row-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
-.row-awards{font-size:1.1rem; font-weight:700; white-space:nowrap}
+.row-awards{font-size:1.35rem; font-weight:700; white-space:nowrap; display:flex; gap:2px}
 .stars-won{font-size:3.2rem; line-height:1; margin-bottom:6px}
 .stars-won span{display:inline-block; animation:pop .45s cubic-bezier(.3,1.6,.5,1) backwards}
 .stars-won span:nth-child(2){animation-delay:.15s}
@@ -373,7 +424,8 @@ const dlg = document.getElementById("dlg");
 
 let storageOk = true;
 let S = load();
-let ui = { groupId: null, dir: "ende", session: null, result: null, flash: null, busy: false, editMode: false };
+let ui = { groupId: null, dir: "ende", session: null, result: null, flash: null, busy: false, editMode: false, select: null };
+let suppressClickUntil = 0;
 
 function load(){
   let d = null;
@@ -392,9 +444,14 @@ function migrate(d){
       w.level = { ende: Math.max(0, b.ende - 1), deen: Math.max(0, b.deen - 1) };
       delete w.box;
     }
+    // „Im Kopf“ bekommt eine eigene Serie; bisheriger Stand wird übernommen
+    if(!w.ml) w.ml = {};
+    if(w.ml.normal === undefined) w.ml.normal = Math.max(w.level.ende, w.level.deen);
   });
   if(!d.settings) d.settings = {};
   if(!d.settings.mode) d.settings.mode = d.settings.advanced ? "profi" : "normal";
+  if(!d.settings.lang) d.settings.lang = "en";
+  d.groups.forEach(g => { if(!g.lang) g.lang = "en"; });
   delete d.settings.advanced;
   d.groups.forEach(g => {
     if(!Array.isArray(g.order)) g.order = [];
@@ -414,6 +471,15 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function norm(s){ return s.trim().replace(/\s+/g," "); }
 
+/* Sprachen: das Feld „en“ einer Karte enthält immer das Wort in der Fremdsprache der Gruppe */
+const LANGS = {
+  en: { key:"en", flag:"🇬🇧", name:"Englisch", adj:"englische", code:"EN", speech:"en-GB", ocr:"eng" },
+  fr: { key:"fr", flag:"🇫🇷", name:"Französisch", adj:"französische", code:"FR", speech:"fr-FR", ocr:"fra" }
+};
+function langOf(key){ return LANGS[key] || LANGS.en; }
+function groupLang(g){ return langOf(g && g.lang); }
+function wordLang(w){ return groupLang(group(w.groupId)); }
+function dirLabels(L){ return [["ende", L.code + " → DE"], ["deen", "DE → " + L.code], ["mix", "Gemischt"]]; }
 function group(id){ return S.groups.find(g => g.id === id); }
 function wordsOf(id){ return S.words.filter(w => w.groupId === id); }
 function wordById(id){ return S.words.find(w => w.id === id); }
@@ -427,64 +493,77 @@ function isSure(w){ return bestLevel(w) >= 3; }
    je höher die Stufe, desto größer die Medaille und desto mehr Bonus-Sterne. */
 const MODES = [
   { key:"normal", icon:"🧠", name:"Im Kopf", short:"Im Kopf", bonus:0, desc:"Karte umdrehen und selbst sagen, ob du es wusstest." },
-  { key:"tipp",   icon:"⌨️", name:"Tippen",  short:"Tippen",  bonus:1, desc:"Jede Übersetzung selbst eintippen. Groß- und Kleinschreibung zählt nicht. +1 Bonus-Stern." },
-  { key:"profi",  icon:"🚀", name:"Profi",   short:"Profi",   bonus:2, desc:"Eintippen, Antippen, Frosch-Sprung, Wort-Gipfel und Wasser-Weg, bunt gemischt. +2 Bonus-Sterne." }
+  { key:"letters", icon:"🔤", name:"Buchstaben", short:"Buchstaben", bonus:1, desc:"Die Buchstaben der Lösung in der richtigen Reihenfolge antippen. +1 Bonus-Stern." },
+  { key:"tipp",   icon:"⌨️", name:"Tippen",  short:"Tippen",  bonus:2, desc:"Jede Übersetzung selbst eintippen. Groß- und Kleinschreibung zählt nicht. +2 Bonus-Sterne." },
+  { key:"profi",  icon:"🚀", name:"Profi",   short:"Profi",   bonus:3, desc:"Eintippen, Antippen, Frosch-Sprung, Wort-Gipfel und Wasser-Weg, bunt gemischt. +3 Bonus-Sterne." }
 ];
 function modeOf(k){ return MODES.find(m => m.key === k) || MODES[0]; }
+// Medaillen nach dem Durchschnitt des Lernstands (0 bis 5) aller Karten der Gruppe
+function avgLevel(ws, L){ return ws.length ? ws.reduce((a, w) => a + L(w), 0) / ws.length : 0; }
 const MEDALS = [
-  { key:"bronze", icon:"🥉", name:"Bronze", goal:"die Hälfte der Karten 2-mal hintereinander wissen",
-    test: (ws, L) => ws.filter(w => L(w) >= 2).length >= ws.length / 2 },
-  { key:"silver", icon:"🥈", name:"Silber", goal:"alle Karten 3-mal hintereinander wissen",
-    test: (ws, L) => ws.every(w => L(w) >= 3) },
-  { key:"gold", icon:"🥇", name:"Gold", goal:"alle Karten 5-mal hintereinander wissen",
-    test: (ws, L) => ws.every(w => L(w) >= 5) }
+  { key:"bronze", icon:"🥉", name:"Bronze", need:2, test: (ws, L) => avgLevel(ws, L) >= 2 },
+  { key:"silver", icon:"🥈", name:"Silber", need:4, test: (ws, L) => avgLevel(ws, L) >= 4 },
+  { key:"gold", icon:"🥇", name:"Gold", need:5, test: (ws, L) => avgLevel(ws, L) >= 5 }
 ];
-const MIN_CARDS_FOR_MEDAL = 5;
+const MIN_CARDS_FOR_MEDAL = 1;
 const TROPHY_STEPS = [10, 25, 50, 100, 200, 400];
-function trophies(g){ return TROPHY_STEPS.filter(n => g.stars >= n).length; }
+function trophies(g){ return TROPHY_STEPS.filter(n => (g.stars || 0) >= n).length; }
 function nextTrophy(g){ return TROPHY_STEPS.find(n => g.stars < n); }
 function starsForRound(ratio){ return ratio >= .9 ? 3 : ratio >= .6 ? 2 : 1; }
 // Lernstand pro Stufe: „Im Kopf“ nutzt den normalen Stand, Tippen und Profi zählen eigene Serien
-function modeLevel(w, mode){ return mode === "normal" ? bestLevel(w) : ((w.ml && w.ml[mode]) || 0); }
-function checkMedals(g, mode){
-  const ws = wordsOf(g.id), won = [];
-  if(ws.length < MIN_CARDS_FOR_MEDAL) return won;
-  const got = g.medals[mode] || (g.medals[mode] = {});
-  const L = w => modeLevel(w, mode);
-  MEDALS.forEach(m => { if(!got[m.key] && m.test(ws, L)){ got[m.key] = true; won.push({ medal:m, mode:modeOf(mode) }); } });
-  return won;
+// Jede Stufe zählt ihre eigene Serie (0 bis 5); der allgemeine Lernstand bestimmt nur die Reihenfolge im Stapel
+function modeLevel(w, mode){ return (w.ml && w.ml[mode]) || 0; }
+// Medaillen gelten nur, solange der Durchschnitt reicht: sinkt er, ist die Medaille wieder weg
+function hasMedal(g, modeKey, m){
+  const ws = wordsOf(g.id);
+  return ws.length >= MIN_CARDS_FOR_MEDAL && m.test(ws, w => modeLevel(w, modeKey));
+}
+function checkMedals(g){
+  if(!g.medals) g.medals = {};
+  const changes = [];
+  MODES.forEach(md => {
+    const before = g.medals[md.key] || {}, now = {};
+    MEDALS.forEach(m => {
+      now[m.key] = hasMedal(g, md.key, m);
+      if(now[m.key] && !before[m.key]) changes.push({ medal:m, mode:md, won:true });
+      if(!now[m.key] && before[m.key]) changes.push({ medal:m, mode:md, won:false });
+    });
+    g.medals[md.key] = now;
+  });
+  return changes;
 }
 function medalIcons(g, showMissing){
+  if(!g.medals) g.medals = {};
+  if(typeof g.stars !== "number") g.stars = 0;
   if(showMissing){
     return `<div class="medal-tiers" role="group" aria-label="Stufe wählen">${MODES.map((md, i) => `
       <button class="tier t${i}" data-mode="${md.key}" aria-pressed="${S.settings.mode === md.key}">
-        <div class="tier-medals">${MEDALS.map(m => (g.medals[md.key] || {})[m.key]
+        <div class="tier-medals">${MEDALS.map(m => hasMedal(g, md.key, m)
           ? `<span title="${md.name}: ${m.name}">${m.icon}</span>`
           : `<span class="award-off" title="${md.name}: ${m.name} noch nicht geschafft">${m.icon}</span>`).join("")}</div>
-        <div class="tier-name">${md.icon} ${md.short}</div>
+        <div class="tier-name"><span class="tn-icon">${md.icon}</span>${md.short}</div>
       </button>`).join("")}</div>`;
   }
-  return MODES.map((md, i) => MEDALS.filter(m => (g.medals[md.key] || {})[m.key])
+  return MODES.map((md, i) => MEDALS.filter(m => hasMedal(g, md.key, m))
     .map(m => `<span class="mini t${i}" title="${md.name}: ${m.name}">${m.icon}</span>`).join("")).join("");
 }
 function awardsHeader(g){
   const t = trophies(g), next = nextTrophy(g), md = modeOf(S.settings.mode);
-  const got = g.medals[md.key] || {};
-  const nextMedal = MEDALS.find(m => !got[m.key]);
+  const nextMedal = MEDALS.find(m => !hasMedal(g, md.key, m));
   const n = wordsOf(g.id).length;
   let goal = "";
-  if(nextMedal) goal = n < MIN_CARDS_FOR_MEDAL
-    ? `Medaillen gibt es ab ${MIN_CARDS_FOR_MEDAL} Karten.`
-    : `${nextMedal.icon} ${md.name}-${nextMedal.name}: ${nextMedal.goal}`;
-  else goal = `${md.icon} Alle ${md.name}-Medaillen geschafft!`;
+  const avg = avgLevel(wordsOf(g.id), w => modeLevel(w, md.key));
+  const fmt = x => (Math.round(x * 10) / 10).toLocaleString("de-DE");
+  if(nextMedal) goal = !n
+    ? "Füge Karten hinzu, um Medaillen zu sammeln."
+    : `${md.icon} Stand: Ø ${fmt(avg)} von 5, noch ${fmt(Math.max(0.1, nextMedal.need - avg))} bis ${nextMedal.icon} ${nextMedal.name} (Ø ${nextMedal.need})`;
+  else goal = `${md.icon} Alle ${md.name}-Medaillen geschafft! Halte den Ø auf 5, sonst geht Gold verloren.`;
   return `<div class="awards">
       <span class="stars">⭐ ${g.stars}</span>
       <span class="trophies">${t ? "🏆".repeat(Math.min(t, 3)) + (t > 3 ? `<small>×${t}</small>` : "") : '<span class="award-off">🏆</span>'}</span>
     </div>
     ${medalIcons(g, true)}
-    <p class="level-desc"><strong>${md.icon} ${md.name}:</strong> ${md.desc}</p>
-    ${goal ? `<p class="goal">${goal}</p>` : ""}
-    ${next ? `<p class="goal">🏆 Noch ${next - g.stars} ⭐ bis zum nächsten Pokal</p>` : ""}`;
+    <p class="level-desc"><strong>${md.icon} ${md.name}:</strong> ${md.desc}</p>`;
 }
 
 // Stapel-Reihenfolge der Gruppe aktuell halten
@@ -505,11 +584,15 @@ window.addEventListener("hashchange", render);
 
 function render(){
   const h = location.hash;
+  if(h === "#klasse") return renderGradePick(false);
+  if(!S.settings.grade && h !== "#sicherung") return renderGradePick(true);
   if(h === "#gruppe" && group(ui.groupId)) return renderGroup();
   if(h === "#lernen" && ui.session) return renderLearn(true);
   if(h === "#ergebnis" && ui.result) return renderResult();
   if(h === "#import" && ui.imp && group(ui.groupId)) return renderImport();
   if(h === "#sicherung") return renderBackup();
+  if(h === "#info") return renderInfo();
+  if(h === "#mix" && ui.mixIds) return renderMixPage();
   if(h && h !== "#start"){ history.replaceState(null, "", location.pathname + location.search); }
   renderHome();
 }
@@ -519,7 +602,14 @@ function banner(){
 
 /* ---------- Start: Gruppen ---------- */
 function renderHome(){
-  const groups = [...S.groups].sort((a,b) => a.name.localeCompare(b.name, "de"));
+  const grade = S.settings.grade;
+  let changed = false;
+  const lang = S.settings.lang || "en", L = langOf(lang);
+  S.groups.forEach(g => { if(!g.grade){ g.grade = grade; changed = true; } if(!g.lang){ g.lang = "en"; changed = true; } });   // z. B. aus einer älteren Sicherung
+  if(changed) save();
+  const groups = S.groups.filter(g => g.grade === grade && g.lang === lang).sort((a,b) => a.name.localeCompare(b.name, "de"));
+  const sel = ui.select;
+  const selCards = sel ? S.words.filter(w => sel.has(w.groupId)).length : 0;
   app.innerHTML = banner() + `
     <header class="hero">
       <div class="hero-top">
@@ -527,33 +617,197 @@ function renderHome(){
         <div class="hero-actions">
           <button class="icon-btn backup-btn" id="addGroupTop" aria-label="Neue Gruppe anlegen" title="Neue Gruppe">➕</button>
           <button class="icon-btn backup-btn" id="openBackup" aria-label="Sicherung öffnen" title="Sicherung">💾</button>
+          <button class="icon-btn backup-btn" id="openInfo" aria-label="So funktioniert’s" title="So funktioniert’s">ℹ️</button>
         </div>
       </div>
       <h1>Wortschatzkiste</h1>
-      <p class="muted">Englisch-Vokabeln sammeln und üben.</p>
+      <p class="muted">Vokabeln sammeln und üben.</p>
+      <div class="chips">
+        <button class="grade-chip" id="gradeBtn" aria-label="Klasse wechseln">🎒 ${grade}. Klasse <span aria-hidden="true">▾</span></button>
+        <button class="grade-chip lang-chip" id="langBtn" aria-label="Sprache: ${L.name}. Tippen zum Wechseln" title="${L.name}">${L.flag} <span aria-hidden="true">▾</span></button>
+      </div>
     </header>
     ${groups.length ? `<div class="list">${groups.map(g => {
       const ws = wordsOf(g.id), sure = ws.filter(w => isSure(w)).length, t = trophies(g);
-      return `<button class="group-row" data-open="${esc(g.id)}">
-        <span class="row-head"><span class="name">${esc(g.name)}</span>
-          <span class="row-awards">${medalIcons(g, false)}${t ? "🏆" + (t > 1 ? "×" + t : "") : ""} ⭐ ${g.stars}</span></span>
+      const on = sel && sel.has(g.id);
+      return `<div class="swipe-wrap"><div class="swipe-bg" aria-hidden="true">${sel && sel.size >= 2 ? "🔀 Mix ▶" : "Öffnen ▶"}</div><button class="group-row ${on ? "selected" : ""} ${sel && !ws.length ? "disabled" : ""}" data-open="${esc(g.id)}" data-count="${ws.length}" ${sel ? `aria-pressed="${!!on}"` : ""}>
+        <span class="row-head">${sel ? `<span class="sel-mark" aria-hidden="true">${on ? "✓" : ""}</span>` : ""}<span class="name">${esc(g.name)}</span>
+          <span class="row-awards">${MEDALS.map(m => ws.length && m.test(ws, bestLevel) ? `<span title="${m.name}">${m.icon}</span>` : `<span class="award-off" title="${m.name} noch nicht erreicht">${m.icon}</span>`).join("")}</span></span>
         <span class="meta">${plural(ws.length, "Karte", "Karten")}${ws.length ? `, ${sure} ${sure === 1 ? "sitzt" : "sitzen"}` : ""}</span>
         <div class="boxbar" aria-hidden="true"><span style="width:${ws.length ? sure/ws.length*100 : 0}%"></span></div>
-      </button>`;}).join("")}</div>`
-    : `<div class="empty"><p><strong>Noch keine Gruppe da.</strong></p><p class="muted">Tippe oben rechts auf ➕ und leg die erste an, zum Beispiel „Unit 1 – Colours“.</p></div>`}
+      </button></div>`;}).join("")}</div>`
+    : `<div class="empty"><p><strong>Noch keine ${L.name}-Gruppe in der ${grade}. Klasse.</strong></p><p class="muted">Tippe oben rechts auf ➕ und leg die erste an, zum Beispiel ${lang === "fr" ? "„Unité 1 – Les couleurs“" : "„Unit 1 – Colours“"}.</p></div>`}
+    ${groups.length && !sel ? `<p class="goal" style="text-align:center">Tipp: Antippen oder nach rechts wischen öffnet eine Gruppe.${groups.length > 1 ? " Lange drücken wählt mehrere aus." : ""}</p>` : ""}
+    ${sel ? `<div style="height:150px"></div>
+    <div class="mix-bar" role="region" aria-label="Gruppen zusammen üben">
+      <div class="mix-head"><strong>🔀 ${plural(sel.size, "Gruppe", "Gruppen")}, ${plural(selCards, "Karte", "Karten")}</strong>
+        <button class="icon-btn" id="mixCancel" aria-label="Auswahl beenden">✕</button></div>
+      <p class="mix-hint">${sel.size < 2 ? "Tippe weitere Gruppen an." : "Wische eine Gruppe nach rechts, um zusammen zu üben ▶"}</p>
+    </div>` : ""}
 
   `;
-  app.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { ui.groupId = b.dataset.open; ui.editMode = false; go("#gruppe"); });
+  const rerender = () => { const y = window.scrollY; renderHome(); window.scrollTo(0, y); };
+  // Wischen nach rechts öffnet (bei mehreren markierten Gruppen: zusammen üben), lange drücken markiert
+  const swipeGo = id => {
+    if(ui.select && ui.select.size >= 2){ ui.mixIds = [...ui.select]; ui.select = null; go("#mix"); return; }
+    ui.select = null; ui.groupId = id; ui.editMode = false; go("#gruppe");
+  };
+  const allRows = [...app.querySelectorAll("[data-open]")];
+  allRows.forEach(b => {
+    const id = b.dataset.open, count = +b.dataset.count;
+    const bg = b.parentElement.querySelector(".swipe-bg");
+    // Bei mehreren markierten Gruppen bewegen sich alle markierten mit
+    const movers = () => (ui.select && ui.select.size >= 2) ? allRows.filter(r => r === b || ui.select.has(r.dataset.open)) : [b];
+    const bgOf = r => r.parentElement.querySelector(".swipe-bg");
+    let timer = null, sx = 0, sy = 0, fired = false, swiping = false, dx = 0, down = false, swallow = false;
+    const cancel = () => { clearTimeout(timer); timer = null; };
+    const reset = () => {
+      movers().forEach(r => {
+        const rb = bgOf(r);
+        r.style.transition = "transform .2s ease-out"; r.style.transform = ""; rb.style.opacity = 0; rb.classList.remove("ready");
+        setTimeout(() => { r.style.transition = ""; }, 220);
+      });
+    };
+    const finish = () => {
+      down = false; cancel();
+      if(fired){
+        fired = false; swallow = true; setTimeout(() => { swallow = false; }, 80);
+        setTimeout(() => { ui.select = new Set([id]); rerender(); }, 0);
+        return;
+      }
+      if(swiping){
+        swiping = false; swallow = true; setTimeout(() => { swallow = false; }, 80);
+        if(dx >= 90){ movers().forEach(r => { r.style.transition = "transform .12s ease-in"; r.style.transform = "translateX(100%)"; }); setTimeout(() => swipeGo(id), 130); }
+        else reset();
+      }
+    };
+    b.addEventListener("pointerdown", e => {
+      down = true; sx = e.clientX; sy = e.clientY; dx = 0; swiping = false; fired = false; cancel();
+      if(ui.select) return;
+      timer = setTimeout(() => {
+        timer = null;
+        if(!count || swiping) return;
+        fired = true;
+        b.classList.add("selected");
+        try{ navigator.vibrate && navigator.vibrate(25); }catch(_){}
+      }, 480);
+    });
+    b.addEventListener("pointermove", e => {
+      if(!down) return;
+      const mx = e.clientX - sx, my = e.clientY - sy;
+      if(timer && Math.hypot(mx, my) > 10) cancel();
+      if(!swiping && !fired && mx > 12 && Math.abs(mx) > Math.abs(my) * 1.3){
+        swiping = true;
+        try{ b.setPointerCapture(e.pointerId); }catch(_){}
+      }
+      if(swiping){
+        dx = Math.max(0, Math.min(170, mx));
+        movers().forEach(r => {
+          const rb = bgOf(r);
+          r.style.transform = "translateX(" + dx + "px)";
+          rb.style.opacity = Math.min(1, dx / 90);
+          rb.classList.toggle("ready", dx >= 90);
+        });
+      }
+    });
+    b.addEventListener("pointerup", finish);
+    b.addEventListener("pointercancel", () => { if(swiping){ swiping = false; down = false; reset(); } else finish(); });
+    b.addEventListener("contextmenu", e => e.preventDefault());
+    b.onclick = () => {
+      if(swallow) return;
+      if(ui.select){
+        if(!count) return;
+        if(ui.select.has(id)) ui.select.delete(id); else ui.select.add(id);
+        if(!ui.select.size) ui.select = null;
+        rerender(); return;
+      }
+      ui.groupId = id; ui.editMode = false; go("#gruppe");
+    };
+  });
+  if(sel){
+    document.getElementById("mixCancel").onclick = () => { ui.select = null; rerender(); };
+  }
   const newGroupFn = async () => {
     const r = await ask({ title:"Neue Gruppe", fields:[{name:"name", label:"Name der Gruppe", placeholder:"z. B. Unit 2 – Animals"}], ok:"Gruppe anlegen" });
     if(!r || !norm(r.name)) return;
-    const g = { id: uid(), name: norm(r.name), created: Date.now(), order: [] };
+    const g = { id: uid(), name: norm(r.name), created: Date.now(), order: [], stars: 0, medals: {}, grade: S.settings.grade, lang: S.settings.lang || "en" };
     S.groups.push(g); save();
     ui.groupId = g.id; ui.editMode = true; go("#gruppe");
   };
   document.getElementById("addGroupTop").onclick = newGroupFn;
+  document.getElementById("gradeBtn").onclick = () => { ui.select = null; go("#klasse"); };
+  document.getElementById("langBtn").onclick = async () => {
+    const c = await choose("Welche Sprache lernst du?", "", Object.values(LANGS).map(x => ({ value: x.key, label: x.flag + " " + x.name + (x.key === lang ? " ✓" : ""), primary: x.key === lang })));
+    if(!c) return;
+    S.settings.lang = c; ui.select = null; save(); renderHome();
+  };
+  if(ui.homeNote){
+    const n = document.createElement("div");
+    n.className = "note info"; n.setAttribute("role", "status"); n.textContent = ui.homeNote; ui.homeNote = null;
+    const list = app.querySelector(".list, .empty"); if(list) list.before(n);
+  }
   document.getElementById("openBackup").onclick = () => go("#sicherung");
+  document.getElementById("openInfo").onclick = () => go("#info");
   window.scrollTo(0,0);
+}
+
+/* ---------- Klasse wählen ---------- */
+function renderGradePick(first){
+  const cur = S.settings.grade;
+  app.innerHTML = banner() + `
+    ${first ? `<header class="hero"><div class="box-art" aria-hidden="true">🗃️</div><h1>Wortschatzkiste</h1></header>`
+            : `<div class="topbar"><button class="back" id="back">‹ Gruppen</button></div>`}
+    <h2 style="font-size:1.6rem;margin:.6em 0 .2em">In welche Klasse gehst du?</h2>
+    <p class="muted">${first ? "Danach siehst du die Gruppen deiner Klasse." : "Du kannst die Klasse jederzeit wieder wechseln."}</p>
+    <div class="grade-grid" role="group" aria-label="Klasse">
+      ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="grade-btn" data-grade="${n}" aria-pressed="${n === cur}"><b>${n}.</b><span>Klasse</span></button>`).join("")}
+    </div>`;
+  const back = document.getElementById("back");
+  if(back) back.onclick = () => go("#start", true);
+  app.querySelectorAll("[data-grade]").forEach(b => b.onclick = () => {
+    const n = +b.dataset.grade;
+    S.settings.grade = n;
+    S.groups.forEach(g => { if(!g.grade) g.grade = n; });   // bestehende Gruppen der ersten gewählten Klasse zuordnen
+    save();
+    ui.select = null;
+    go("#start", true);
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ---------- So funktioniert’s: Anleitungs-Video (anleitung.mp4 neben der App) ---------- */
+function renderInfo(){
+  const canVideo = !window.claude && location.protocol.startsWith("http");
+  const steps = [
+    "🎒 Oben Klasse und Sprache 🇬🇧 / 🇫🇷 wählen.",
+    "➕ Eine Gruppe anlegen, zum Beispiel „Unit 3“.",
+    "✏️ Bearbeiten: Karten mit ➕ eintippen, mit 📷 die Buchseite fotografieren oder mit 📋 eine Liste einfügen.",
+    "Gruppe antippen oder nach rechts wischen, dann auf den Kartenstapel tippen.",
+    "Stufe wählen: 🧠 Im Kopf, 🔤 Buchstaben, ⌨️ Tippen oder 🚀 Profi mit Spielen.",
+    "Gewusste Karten wandern nach hinten, schwierige kommen öfter dran.",
+    "⭐ Sterne, 🏆 Pokale und 🥉🥈🥇 Medaillen sammeln. Medaillen gehen bei Fehlern auch wieder verloren.",
+    "Lange auf eine Gruppe drücken, weitere antippen und nach rechts wischen: mehrere Gruppen zusammen üben.",
+    "💾 Ab und zu eine Sicherung speichern."
+  ];
+  app.innerHTML = banner() + `
+    <div class="topbar"><button class="back" id="back">‹ Gruppen</button></div>
+    <h1>So funktioniert’s</h1>
+    ${canVideo ? `<div class="info-video">
+        <video id="infoVideo" controls playsinline preload="metadata" src="anleitung.mp4"></video>
+      </div>
+      <div id="videoNote"></div>`
+      : `<div class="note info">Das Anleitungs-Video gibt es in der installierten App.</div>`}
+    <section class="panel">
+      <h2 style="margin-top:0">In 9 Schritten</h2>
+      <ol class="info-steps">${steps.map(t => `<li>${t}</li>`).join("")}</ol>
+    </section>`;
+  document.getElementById("back").onclick = () => go("#start");
+  const v = document.getElementById("infoVideo");
+  if(v) v.addEventListener("error", () => {
+    v.parentElement.remove();
+    document.getElementById("videoNote").innerHTML = `<div class="note info">Das Video ist gerade nicht erreichbar. ${navigator.onLine ? "" : "Dafür braucht es Internet. "}Die Anleitung darunter funktioniert trotzdem.</div>`;
+  });
+  window.scrollTo(0, 0);
 }
 
 /* ---------- Gruppe ---------- */
@@ -561,7 +815,7 @@ function renderGroup(){
   const g = group(ui.groupId), ws = wordsOf(g.id);
   if(ui.editMode) return renderEdit(g, ws);
   const sure = ws.filter(w => isSure(w)).length;
-  const dirs = [["ende","EN → DE"],["deen","DE → EN"],["mix","Gemischt"]];
+  const dirs = dirLabels(groupLang(g));
   app.innerHTML = banner() + `
     <div class="topbar">
       <button class="back" id="back">‹ Gruppen</button>
@@ -690,7 +944,8 @@ async function readPhotoLocal(file, g, status){
   try{
     await loadTesseract();
     if(stopped) return;
-    worker = await Tesseract.createWorker(["eng", "deu"], 1, {
+    PARSE_LANG = groupLang(g).key;
+    worker = await Tesseract.createWorker([groupLang(g).ocr, "deu"], 1, {
       workerPath: ocrUrl("worker.min.js"), corePath: ocrUrl(""), langPath: ocrUrl(""), workerBlobURL: false,
       logger: m => {
         const el = prog(); if(!el) return;
@@ -1012,6 +1267,50 @@ function startClimb(st, ans, onResult){
   requestAnimationFrame(loop);
 }
 
+/* ---------- Mehrere Gruppen zusammen: Einstellungen wie bei einer Gruppe ---------- */
+function renderMixPage(){
+  const ids = ui.mixIds.filter(id => group(id));
+  if(ids.length < 2){ ui.mixIds = null; return go("#start", true); }
+  const gs = ids.map(group), ws = S.words.filter(w => ids.includes(w.groupId));
+  const sure = ws.filter(w => isSure(w)).length, md = modeOf(S.settings.mode);
+  const dirs = dirLabels(langOf(S.settings.lang));
+  app.innerHTML = banner() + `
+    <div class="topbar"><button class="back" id="back">‹ Gruppen</button></div>
+    <h1>🔀 Zusammen üben</h1>
+    <p class="muted" style="font-weight:600">${gs.map(g => esc(g.name)).join(" + ")}</p>
+    <div class="medal-tiers" role="group" aria-label="Stufe wählen">${MODES.map((m, i) => `
+      <button class="tier t${i}" data-mode="${m.key}" aria-pressed="${S.settings.mode === m.key}">
+        <div class="tier-medals">${MEDALS.map(md2 => ws.length && md2.test(ws, w => modeLevel(w, m.key))
+          ? `<span title="${m.name}: ${md2.name}">${md2.icon}</span>`
+          : `<span class="award-off" title="${m.name}: ${md2.name} noch nicht erreicht">${md2.icon}</span>`).join("")}</div>
+        <div class="tier-name"><span class="tn-icon">${m.icon}</span>${m.short}</div></button>`).join("")}</div>
+    <p class="level-desc"><strong>${md.icon} ${md.name}:</strong> ${md.desc}</p>
+
+    <section class="panel">
+      <div class="stack tappable" id="stackStart" role="button" tabindex="0" aria-label="Üben starten">
+        ${ws.length > 2 ? '<div class="under u2 paper"></div>' : ""}
+        ${ws.length > 1 ? '<div class="under u1 paper"></div>' : ""}
+        <div class="top-card"><div class="card"><div class="face paper stack-info">
+          <div class="lang">🔀 Gemischter Stapel</div>
+          <div class="word">${plural(ws.length, "Karte", "Karten")}</div>
+          <div class="tap-hint"><span>▶ Tippe hier, um zu üben</span></div>
+        </div></div></div>
+      </div>
+      <div class="sure"><span>${sure} von ${ws.length} sitzen</span><div class="bar"><span style="width:${ws.length ? sure/ws.length*100 : 0}%"></span></div></div>
+      <div class="seg" role="group" aria-label="Richtung">
+        ${dirs.map(([k,l]) => `<button data-dir="${k}" aria-pressed="${ui.dir===k}">${l}</button>`).join("")}
+      </div>
+    </section>
+  `;
+  document.getElementById("back").onclick = () => { ui.mixIds = null; go("#start"); };
+  app.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { S.settings.mode = b.dataset.mode; save(); renderMixPage(); });
+  app.querySelectorAll("[data-dir]").forEach(b => b.onclick = () => { ui.dir = b.dataset.dir; renderMixPage(); });
+  const st = document.getElementById("stackStart");
+  st.onclick = () => startSession(ids);
+  st.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); startSession(ids); } };
+  window.scrollTo(0,0);
+}
+
 /* ---------- Bearbeiten ---------- */
 function renderEdit(g, ws){
   if(ui.addOpen === undefined) ui.addOpen = !ws.length;
@@ -1023,7 +1322,9 @@ function renderEdit(g, ws){
     </div>
     <h1>${esc(g.name)}</h1>
     <div class="group-tools">
-      <button class="btn ghost small" id="rename">✏️ Umbenennen</button>
+      <button class="btn ghost small" id="rename">✏️ Name</button>
+      <button class="btn ghost small" id="gradeGroup">🎒 ${g.grade || S.settings.grade}. Klasse</button>
+      <button class="btn ghost small" id="langGroup">${groupLang(g).flag} ${groupLang(g).name}</button>
       <button class="btn ghost small" id="delGroup" style="color:var(--bad)">🗑️ Löschen</button>
     </div>
 
@@ -1040,7 +1341,7 @@ function renderEdit(g, ws){
       <div id="photoStatus" aria-live="polite"></div>
       ${ui.addOpen ? `
       <div class="add-form">
-        <input type="text" id="en" placeholder="🇬🇧 Englisch" aria-label="Englisch" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="next">
+        <input type="text" id="en" placeholder="${groupLang(g).flag} ${groupLang(g).name}" aria-label="${groupLang(g).name}" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="next">
         <input type="text" id="de" placeholder="🇩🇪 Deutsch" aria-label="Deutsch" autocomplete="off" enterkeyhint="done">
         <div class="answers"><button class="btn ghost" id="addClose">Schließen</button><button class="btn" id="add">Speichern</button></div>
       </div>` : ""}
@@ -1048,17 +1349,33 @@ function renderEdit(g, ws){
       ${ws.length ? `
       <ul class="words">${sorted.map(w => `
         <li><button data-word="${esc(w.id)}" aria-label="${esc(w.en)} bearbeiten">
-          <span class="dot" style="background:${dotColor(bestLevel(w))}"></span>
+          ${cardMedal(bestLevel(w))}
           <span class="pair"><span class="en">${esc(w.en)}</span> <span class="de">– ${esc(w.de)}</span></span>
           <span class="edit-ico" aria-hidden="true">✏️</span>
         </button></li>`).join("")}
       </ul>
-      <p class="muted" style="font-size:.9rem;margin-top:10px">Sortiert von 🔴 noch unsicher über 🟡 wird besser bis 🟢 sitzt</p>`
+      <p class="muted" style="font-size:.9rem;margin-top:10px">Sortiert von <span class="award-off">🥉</span> noch unsicher über 🥉 Bronze (2) und 🥈 Silber (4) bis 🥇 Gold (5)</p>`
       : `<p class="muted" style="text-align:center;margin:12px 0 4px">Noch keine Karten. Tippe auf ➕ zum Eintippen, 📷 für ein Foto der Vokabelliste oder 📋 zum Einfügen.</p>`}
     </section>
   `;
   document.getElementById("back").onclick = () => { ui.editMode = false; ui.addOpen = undefined; go("#start"); };
   document.getElementById("editToggle").onclick = () => { ui.editMode = false; ui.addOpen = undefined; renderGroup(); window.scrollTo(0,0); };
+  document.getElementById("langGroup").onclick = async () => {
+    const c = await choose("Sprache der Gruppe", `Welche Sprache lernt man mit „${g.name}“?`,
+      Object.values(LANGS).map(x => ({ value: x.key, label: x.flag + " " + x.name + (x.key === g.lang ? " ✓" : ""), primary: x.key === g.lang })));
+    if(!c) return;
+    g.lang = c; save();
+    ui.flash = c === S.settings.lang ? "" : `„${g.name}“ ist jetzt eine ${langOf(c).name}-Gruppe.`;
+    renderGroup();
+  };
+  document.getElementById("gradeGroup").onclick = async () => {
+    const c = await choose("Klasse der Gruppe", `Zu welcher Klasse gehört „${g.name}“?`,
+      [1,2,3,4,5,6,7,8,9].map(n => ({ value: String(n), label: n + ". Klasse" + (n === (g.grade || S.settings.grade) ? " ✓" : ""), primary: n === (g.grade || S.settings.grade) })));
+    if(!c) return;
+    g.grade = +c; save();
+    ui.flash = g.grade === S.settings.grade ? "" : `„${g.name}“ gehört jetzt zur ${g.grade}. Klasse.`;
+    renderGroup();
+  };
   document.getElementById("rename").onclick = async () => {
     const r = await ask({ title:"Gruppe umbenennen", fields:[{name:"name", label:"Neuer Name", value:g.name}], ok:"Namen speichern" });
     if(r && norm(r.name)){ g.name = norm(r.name); save(); renderGroup(); }
@@ -1086,7 +1403,7 @@ function renderEdit(g, ws){
     document.getElementById("addClose").onclick = () => { ui.addOpen = false; renderGroup(); };
     function addWord(){
       const a = norm(en.value), b = norm(de.value);
-      if(!a || !b){ msg.textContent = "Bitte Englisch und Deutsch ausfüllen."; msg.className = "msg err"; (a ? de : en).focus(); return; }
+      if(!a || !b){ msg.textContent = `Bitte ${groupLang(g).name} und Deutsch ausfüllen.`; msg.className = "msg err"; (a ? de : en).focus(); return; }
       if(ws.some(w => w.en.toLowerCase() === a.toLowerCase())){ msg.textContent = `„${a}“ ist schon in dieser Gruppe.`; msg.className = "msg err"; en.focus(); return; }
       const w = { id: uid(), groupId: g.id, en: a, de: b, level: { ende:0, deen:0 }, created: Date.now() };
       S.words.push(w);
@@ -1112,7 +1429,7 @@ function renderEdit(g, ws){
 async function editWord(id){
   const w = wordById(id); if(!w) return;
   const r = await ask({ title:"Karte bearbeiten",
-    fields:[{name:"en", label:"🇬🇧 Englisch", value:w.en}, {name:"de", label:"🇩🇪 Deutsch", value:w.de}],
+    fields:[{name:"en", label:wordLang(w).flag + " " + wordLang(w).name, value:w.en}, {name:"de", label:"🇩🇪 Deutsch", value:w.de}],
     ok:"Änderungen speichern", extra:"🗑️ Karte löschen" });
   if(!r) return;
   if(r === "extra"){
@@ -1159,16 +1476,19 @@ async function readPhoto(file, g, status){
     <span><strong>Foto wird gelesen …</strong><br><span class="muted">Das dauert etwa 10 bis 40 Sekunden.</span></span>
     <button class="btn ghost small" id="photoStop">Stopp</button></div>`;
   document.getElementById("photoStop").onclick = () => ctl.abort();
-  const prompt = "Das Bild zeigt eine Vokabelliste aus einem Englisch-Schulbuch mit englischen Wörtern und ihrer deutschen Übersetzung. " +
+  const L = groupLang(g), fr = L.key === "fr";
+  const prompt = `Das Bild zeigt eine Vokabelliste aus einem ${L.name}-Schulbuch mit ${L.adj}n Wörtern und ihrer deutschen Übersetzung. ` +
     "Lies alle Vokabelpaare der Reihe nach von oben nach unten ab. Lass Lautschrift, Seitenzahlen, Überschriften und Beispielsätze weg. " +
-    "Übernimm die Wörter genau so, wie sie gedruckt sind, auch „to“ bei Verben und Artikel wie „der“, „die“, „das“. " +
+    `Übernimm die Wörter genau so, wie sie gedruckt sind, mit allen Akzenten, ${fr ? "auch Artikel wie „le“, „la“, „l’“" : "auch „to“ bei Verben"} und Artikel wie „der“, „die“, „das“. ` +
     "Handschriftliche Notizen nur übernehmen, wenn sie klar ein Vokabelpaar sind. " +
-    'Antworte nur mit einem JSON-Array, zum Beispiel [{"en":"dog","de":"Hund"},{"en":"to go","de":"gehen"}]. Wenn du keine Vokabeln findest, antworte mit [].';
+    `Antworte nur mit einem JSON-Array. Das Feld "fremd" ist das ${L.adj} Wort, "de" die deutsche Übersetzung, zum Beispiel ` +
+    (fr ? '[{"fremd":"le chien","de":"der Hund"},{"fremd":"aller","de":"gehen"}]' : '[{"fremd":"dog","de":"Hund"},{"fremd":"to go","de":"gehen"}]') +
+    ". Wenn du keine Vokabeln findest, antworte mit [].";
   try{
     const blob = await shrinkImage(file);
     const data = await PHOTO.sample.json(prompt, { images: [blob], signal: ctl.signal });
     const rows = Array.isArray(data) ? data.filter(x => x && typeof x === "object")
-      .map(x => ({ en: norm(String(x.en || "")), de: norm(String(x.de || "")) })).filter(x => x.en || x.de) : [];
+      .map(x => ({ en: norm(String(x.fremd || x.en || x.fr || "")), de: norm(String(x.de || "")) })).filter(x => x.en || x.de) : [];
     if(!rows.length){
       status.innerHTML = `<div class="note warn">Auf dem Foto wurden keine Vokabeln gefunden. Versuch es mit einem schärferen Foto, auf dem nur die Liste zu sehen ist.</div>`;
       return;
@@ -1196,14 +1516,23 @@ function sortBackPosition(level, len){
   return Math.min(len, Math.pow(2, level + 1)); // 4, 8, 16, 32, 64
 }
 
-function startSession(){
-  const g = group(ui.groupId), stack = stackOf(g);
+function startSession(mixIds){
+  let stack, mix = null;
+  if(mixIds && mixIds.length){
+    // Mehrere Gruppen: ein gemeinsamer Stapel, unsichere Karten zuerst, gleicher Lernstand zufällig gemischt
+    mix = mixIds.slice();
+    const dir = ui.dir;
+    const lv = w => dir === "mix" ? Math.min(w.level.ende, w.level.deen) : w.level[dir];
+    stack = shuffle(S.words.filter(w => mix.includes(w.groupId))).sort((a, b) => lv(a) - lv(b)).map(w => w.id);
+  } else stack = stackOf(group(ui.groupId));
   save();
   ui.session = { target: Math.min(ROUND_SIZE, stack.length), done: 0, firstTry: 0, missed: new Set(),
-    flipped: false, dir: null, type: null, lastType: null, mode: modeOf(S.settings.mode).key, state: null };
+    flipped: false, dir: null, type: null, lastType: null, mode: modeOf(S.settings.mode).key, state: null,
+    mix, mixStack: mix ? stack : null, perGroup: {} };
   pickDir();
   go("#lernen");
 }
+function sessionStack(){ const s = ui.session; return s.mixStack || stackOf(group(ui.groupId)); }
 function pickDir(){
   const s = ui.session;
   s.dir = ui.dir === "mix" ? (Math.random() < .5 ? "ende" : "deen") : ui.dir;
@@ -1216,6 +1545,7 @@ const TYPES = {
   typing:   { icon:"⌨️", name:"Eintippen" },
   choice:   { icon:"🎯", name:"Richtig antippen" },
   scramble: { icon:"🔤", name:"Buchstabensalat" },
+  letters:  { icon:"🔤", name:"Buchstaben" },
   frog:     { icon:"🐸", name:"Frosch-Sprung" },
   climb:    { icon:"⛰️", name:"Wort-Gipfel" },
   pipes:    { icon:"🚰", name:"Wasser-Weg" }
@@ -1227,7 +1557,10 @@ function distractors(w, dir, n){
   const mine = answerOf(w, dir).toLowerCase();
   const fromGroup = wordsOf(w.groupId).filter(x => x.id !== w.id);
   let pool = fromGroup.map(x => answerOf(x, dir));
-  if(pool.length < n) pool = pool.concat(S.words.filter(x => x.groupId !== w.groupId).map(x => answerOf(x, dir)));
+  if(pool.length < n){
+    const lang = wordLang(w).key;   // nur Wörter derselben Sprache als falsche Antworten
+    pool = pool.concat(S.words.filter(x => x.groupId !== w.groupId && wordLang(x).key === lang).map(x => answerOf(x, dir)));
+  }
   const seen = new Set([mine]), out = [];
   shuffle(pool).forEach(t => { const k = t.toLowerCase(); if(out.length < n && !seen.has(k)){ seen.add(k); out.push(t); } });
   return out;
@@ -1244,36 +1577,40 @@ function chooseType(w, dir){
 // Groß/Klein egal, Leerzeichen und Satzzeichen am Ende egal, „to“ vor Verben optional,
 // bei „groß, hoch“ oder „groß / hoch“ zählt auch eine Variante.
 function simple(t){ return t.toLowerCase().replace(/[’`]/g, "'").replace(/[.!?]+$/,"").replace(/\s+/g," ").trim().replace(/^to /, ""); }
-function isCorrect(input, answer){
+function deaccent(t){ return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/œ/g, "oe").replace(/æ/g, "ae"); }
+function isCorrect(input, answer, loose){
   const a = simple(input);
   if(!a) return false;
-  if(a === simple(answer)) return true;
-  return answer.split(/\s*[,/;]\s*/).some(part => part && simple(part) === a);
+  const same = (x, y) => x === y || (loose && deaccent(x) === deaccent(y));
+  if(same(a, simple(answer))) return true;
+  return answer.split(/\s*[,/;]\s*/).some(part => part && same(simple(part), a));
 }
 
 function renderLearn(entering){
-  const s = ui.session, g = group(ui.groupId);
-  if(!g){ ui.session = null; return go("#start", true); }
-  const stack = stackOf(g);
+  const s = ui.session;
+  if(!s.mix && !group(ui.groupId)){ ui.session = null; return go("#start", true); }
+  const stack = sessionStack();
   const w = wordById(stack[0]);
-  if(!w){ ui.session = null; return go("#gruppe", true); }
-  if(!s.type) s.type = s.mode === "profi" ? chooseType(w, s.dir) : s.mode === "tipp" ? "typing" : "flip";
+  if(!w){ ui.session = null; return go(s.mix ? "#start" : "#gruppe", true); }
+  if(!s.type) s.type = s.mode === "profi" ? chooseType(w, s.dir) : s.mode === "tipp" ? "typing" : s.mode === "letters" ? "letters" : "flip";
   const head = `
     <div class="topbar">
       <button class="back" id="quit">✕ Beenden</button>
       <span class="muted" style="font-weight:700">${modeOf(s.mode).icon} ${s.done} / ${s.target}</span>
     </div>
     <div class="progress" aria-hidden="true"><span style="width:${s.done/s.target*100}%"></span></div>
+    ${s.mix ? `<p class="task-type mix-from">🔀 Mix · aus „${esc((group(w.groupId) || {}).name || "")}“</p>` : ""}
     ${s.mode === "profi" ? `<p class="task-type">${TYPES[s.type].icon} ${TYPES[s.type].name}</p>` : ""}`;
   if(s.type === "flip") renderFlip(head, w, stack, entering);
   else renderChallenge(head, w);
-  document.getElementById("quit").onclick = () => { ui.session = null; go("#gruppe", true); };
+  document.getElementById("quit").onclick = () => { const m = s.mix; ui.session = null; if(m) ui.mixIds = m; go(m ? "#mix" : "#gruppe", true); };
 }
 
 function renderFlip(head, w, stack, entering){
   const s = ui.session, askEn = s.dir === "ende";
   const front = promptOf(w, s.dir), back = answerOf(w, s.dir);
-  const frontLang = askEn ? "🇬🇧 Englisch" : "🇩🇪 Deutsch", backLang = askEn ? "🇩🇪 Deutsch" : "🇬🇧 Englisch";
+  const WL = wordLang(w), fgn = WL.flag + " " + WL.name;
+  const frontLang = askEn ? fgn : "🇩🇪 Deutsch", backLang = askEn ? "🇩🇪 Deutsch" : fgn;
   const again = s.missed.has(w.id);
   app.innerHTML = head + `
     <div class="stack">
@@ -1311,11 +1648,11 @@ function renderFlip(head, w, stack, entering){
   function flip(){
     if(s.flipped) return;
     s.flipped = true; card.classList.add("flipped"); showControls();
-    if(!askEn) speak(w.en);
+    if(!askEn) speakWord(w);
   }
   card.onclick = e => { if(e.target.closest(".speak")) return; flip(); };
   card.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); } };
-  app.querySelectorAll(".speak").forEach(b => b.onclick = e => { e.stopPropagation(); speak(w.en); });
+  app.querySelectorAll(".speak").forEach(b => b.onclick = e => { e.stopPropagation(); speakWord(w); });
   showControls();
 }
 
@@ -1326,23 +1663,30 @@ function renderChallenge(head, w){
   const st = s.state || (s.state = makeState(s.type, w, s.dir));
   app.innerHTML = head + `
     <div class="mini-card paper ${s.type === "climb" || s.type === "pipes" ? "compact" : ""}">
-      <div class="lang">${askEn ? "🇬🇧 Englisch" : "🇩🇪 Deutsch"} <span class="muted" style="font-weight:600">→ ${askEn ? "🇩🇪 Deutsch" : "🇬🇧 Englisch"}</span></div>
+      <div class="lang">${askEn ? wordLang(w).flag + " " + wordLang(w).name : "🇩🇪 Deutsch"} <span class="muted" style="font-weight:600">→ ${askEn ? "🇩🇪 Deutsch" : wordLang(w).flag + " " + wordLang(w).name}</span></div>
       ${askEn ? '<button class="speak" id="say" aria-label="Vorlesen">🔊</button>' : ""}
       <div class="word">${esc(prompt)}</div>
     </div>
     <div id="task"></div>
     <div id="feedback" aria-live="polite"></div>
   `;
-  const say = document.getElementById("say"); if(say) say.onclick = () => speak(w.en);
+  const say = document.getElementById("say"); if(say) say.onclick = () => speakWord(w);
   const task = document.getElementById("task"), fb = document.getElementById("feedback");
+  // Kurze Sperre nach dem Kartenwechsel, damit ein Tipp auf „Weiter“ nicht auf der nächsten Karte landet
+  app.classList.add("tap-guard");
+  clearTimeout(window.__tapGuard);
+  window.__tapGuard = setTimeout(() => app.classList.remove("tap-guard"), 500);
 
   function done(right, given){
     if(st.finished) return;
     st.finished = true;
-    if(!askEn) speak(w.en);
+    if(!askEn) speakWord(w);
     if(right){
-      fb.innerHTML = `<div class="verdict good">✓ Richtig!${given && simple(given) !== simple(ans) ? ` Ganz genau: <strong>${esc(ans)}</strong>` : ""}</div>`;
-      setTimeout(() => answer(true), st.delay || 900);
+      fb.innerHTML = `<button class="verdict good verdict-btn" id="goOn">✓ Richtig!${given && simple(given) !== simple(ans) ? ` Ganz genau: <strong>${esc(ans)}</strong>` : ""} <span class="verdict-next">Weiter ▶</span></button>`;
+      let advanced = false;
+      const goNext = () => { if(advanced) return; advanced = true; answer(true); };
+      document.getElementById("goOn").onclick = goNext;
+      setTimeout(goNext, st.delay || 1500);
     } else {
       fb.innerHTML = `<div class="verdict bad">Richtig wäre: <strong>${esc(ans)}</strong></div>
         <button class="btn" id="goOn">Weiter</button>`;
@@ -1360,7 +1704,7 @@ function renderChallenge(head, w){
       </div>`;
     const inp = document.getElementById("typed");
     const check = () => { if(st.finished) return; const v = inp.value; if(!v.trim()) { inp.focus(); return; }
-      const ok = isCorrect(v, ans); inp.classList.add(ok ? "ok" : "no"); inp.readOnly = true;
+      const ok = isCorrect(v, ans, s.dir === "deen" && wordLang(w).key === "fr"); inp.classList.add(ok ? "ok" : "no"); inp.readOnly = true;
       task.querySelector(".answers").remove(); done(ok, v); };
     inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); check(); } });
     document.getElementById("check").onclick = check;
@@ -1379,6 +1723,46 @@ function renderChallenge(head, w){
     });
   }
 
+  if(s.type === "letters"){
+    // Nur die Buchstaben der Lösung; in der richtigen Reihenfolge antippen, benutzte werden grau
+    const draw = () => {
+      let k = 0;
+      const slots = st.target.map(ch => {
+        if(ch === " ") return '<span class="gap"></span>';
+        const i = k++, filled = i < st.pos;
+        return `<span class="slot ${filled ? "filled" : ""}">${filled ? esc(st.letters[i]) : ""}</span>`;
+      }).join("");
+      task.innerHTML = `
+        <div class="slots" id="slots">${slots}</div>
+        <div class="tiles">${st.tiles.map((t, i) => `<button class="tile" data-i="${i}" ${st.used.includes(i) ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+        ${st.finished ? "" : `<div style="margin-top:12px"><button class="btn ghost" id="dunno">Weiß ich nicht</button></div>`}`;
+      task.querySelectorAll(".tile").forEach(b => b.onclick = () => {
+        if(st.finished) return;
+        const i = +b.dataset.i;
+        if(st.tiles[i] === st.letters[st.pos]){
+          st.used.push(i); st.pos++;
+          if(st.pos === st.letters.length){
+            if(st.errors === 0){ done(true); draw(); document.getElementById("slots").classList.add("ok"); }
+            else {
+              st.finished = true; draw();
+              document.getElementById("slots").classList.add("ok");
+              if(s.dir !== "ende") speakWord(w);
+              fb.innerHTML = `<div class="verdict bad">✓ Geschafft, aber mit ${st.errors === 1 ? "einem Fehler" : st.errors + " Fehlern"}. Die Karte kommt bald wieder.</div>
+                <button class="btn" id="goOn">Weiter</button>`;
+              document.getElementById("goOn").onclick = () => answer(false);
+            }
+          } else draw();
+        } else {
+          st.errors++;
+          b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+          setTimeout(() => b.classList.remove("wrong"), 450);
+        }
+      });
+      const dn = document.getElementById("dunno");
+      if(dn) dn.onclick = () => { st.pos = st.letters.length; st.used = st.tiles.map((_, i) => i); done(false); draw(); };
+    };
+    draw();
+  }
   if(s.type === "scramble"){
     const drawScramble = () => {
       let k = 0;
@@ -1465,6 +1849,13 @@ function makeState(type, w, dir){
   if(type === "pipes") return Object.assign({ options: shuffle([ans, ...distractors(w, dir, 2)]) }, makePipes());
   if(type === "climb") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
   if(type === "frog") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
+  if(type === "letters"){
+    const target = [...ans];
+    const letters = target.filter(c => c !== " ").map(c => c.toLowerCase());
+    let tiles = shuffle(letters), n = 0;
+    while(letters.length > 1 && tiles.join("") === letters.join("") && n++ < 10) tiles = shuffle(letters);
+    return { target, letters, tiles, used: [], pos: 0, errors: 0 };
+  }
   if(type === "scramble"){
     const target = [...ans];
     const letters = target.filter(c => c !== " ").map(c => c.toLowerCase()); // Kleinbuchstaben, damit der erste Buchstabe nichts verrät
@@ -1477,9 +1868,9 @@ function makeState(type, w, dir){
 
 function answer(knew){
   if(ui.busy) return;
-  const s = ui.session, g = group(ui.groupId), stack = stackOf(g);
+  const s = ui.session, stack = sessionStack();
   const id = stack.shift(), w = wordById(id);
-  if(s.mode !== "normal"){
+  {
     if(!w.ml) w.ml = {};
     w.ml[s.mode] = knew ? Math.min(5, (w.ml[s.mode] || 0) + 1) : 0;
   }
@@ -1488,6 +1879,7 @@ function answer(knew){
     w.level[s.dir] = Math.min(5, w.level[s.dir] + 1);
     if(!s.missed.has(id)) s.firstTry++;
     s.done++;
+    s.perGroup[w.groupId] = (s.perGroup[w.groupId] || 0) + 1;
     label = "✓ Weit nach hinten gelegt";
   } else {
     w.level[s.dir] = 0;
@@ -1516,18 +1908,30 @@ function answer(knew){
 
 function finish(){
   const s = ui.session;
-  const g = group(ui.groupId);
   const ratio = s.target ? s.firstTry / s.target : 0;
   const base = starsForRound(ratio);
   const bonus = ratio >= .6 ? modeOf(s.mode).bonus : 0;
   const coinBonus = Math.min(2, Math.floor((s.coins || 0) / 10));
   const stars = base + bonus + coinBonus;
-  const before = trophies(g);
-  g.stars += stars;
-  const medals = checkMedals(g, s.mode);
-  const newTrophy = trophies(g) > before;
+  const groupsIn = (s.mix || [ui.groupId]).map(group).filter(Boolean);
+  let shares = [stars];
+  if(groupsIn.length > 1){
+    const counts = groupsIn.map(g => s.perGroup[g.id] || 0), total = counts.reduce((a, b) => a + b, 0) || 1;
+    const raw = counts.map(c => stars * c / total);
+    shares = raw.map(Math.floor);
+    let rest = stars - shares.reduce((a, b) => a + b, 0);
+    raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if(rest > 0){ shares[i]++; rest--; } });
+  }
+  const medals = []; let newTrophy = null;
+  groupsIn.forEach((g, i) => {
+    const before = trophies(g);
+    g.stars = (g.stars || 0) + shares[i];
+    checkMedals(g).forEach(m => medals.push(Object.assign({ group: g.name }, m)));
+    if(trophies(g) > before) newTrophy = { name: g.name, stars: g.stars };
+  });
   save();
-  ui.result = { total: s.target, firstTry: s.firstTry, missed: [...s.missed], stars: base, bonus, coins: s.coins || 0, coinBonus, medals, newTrophy, mode: s.mode };
+  ui.result = { total: s.target, firstTry: s.firstTry, missed: [...s.missed], stars: base, bonus, coins: s.coins || 0, coinBonus, medals, newTrophy, mode: s.mode,
+    mix: s.mix, shares: groupsIn.map((g, i) => ({ name: g.name, n: shares[i] })) };
   ui.session = null;
   go("#ergebnis", true);
 }
@@ -1546,28 +1950,77 @@ function renderResult(){
       <p class="muted">${line} +${r.stars} ⭐</p>
       ${r.coins ? `<p class="bonus">🪙 ${r.coins} ${r.coins === 1 ? "Münze" : "Münzen"} gesammelt${r.coinBonus ? `: +${r.coinBonus} ⭐` : ""}</p>` : ""}
       ${r.bonus ? `<p class="bonus">${modeOf(r.mode).icon} ${modeOf(r.mode).name}-Bonus: +${r.bonus} ⭐</p>` : ""}
+      ${r.mix ? `<p class="goal" style="margin-top:8px">🔀 Verteilt: ${r.shares.map(x => `${esc(x.name)} +${x.n} ⭐`).join(", ")}</p>` : ""}
     </div>
-    ${r.medals.map(x => `<div class="new-award big-${x.mode.key}"><span class="icon">${x.medal.icon}</span><span>Neue ${x.mode.name}-${x.medal.name}-Medaille! ${x.mode.icon}</span></div>`).join("")}
-    ${r.newTrophy ? `<div class="new-award"><span class="icon">🏆</span><span>Neuer Pokal! Du hast ${group(ui.groupId).stars} Sterne gesammelt.</span></div>` : ""}
+    ${r.medals.filter(x => x.won).map(x => `<div class="new-award big-${x.mode.key}"><span class="icon">${x.medal.icon}</span><span>Neue ${x.mode.name}-${x.medal.name}-Medaille! ${x.mode.icon}${r.mix ? ` (${esc(x.group)})` : ""}</span></div>`).join("")}
+    ${r.medals.filter(x => !x.won).map(x => `<div class="lost-award"><span class="icon award-off">${x.medal.icon}</span><span>${x.mode.name}-${x.medal.name} verloren${r.mix ? ` (${esc(x.group)})` : ""}. Üb weiter, dann holst du sie zurück!</span></div>`).join("")}
+    ${r.newTrophy ? `<div class="new-award"><span class="icon">🏆</span><span>Neuer Pokal${r.mix ? ` für ${esc(r.newTrophy.name)}` : ""}! ${r.newTrophy.stars} Sterne gesammelt.</span></div>` : ""}
     ${missed.length ? `<section class="panel missed">
       <h2 style="margin-top:0">Diese Karten liegen weiter vorne im Stapel</h2>
       <ul class="words">${missed.map(w => `<li><button tabindex="-1" style="cursor:default"><span class="dot" style="background:var(--b1)"></span><span class="pair"><span class="en">${esc(w.en)}</span> <span class="de">– ${esc(w.de)}</span></span></button></li>`).join("")}</ul>
     </section>` : ""}
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
       <button class="btn" id="again">▶ Noch eine Runde</button>
-      <button class="btn ghost" id="toGroup">Zur Gruppe</button>
+      <button class="btn ghost" id="toGroup">Zurück</button>
     </div>
   `;
-  document.getElementById("again").onclick = () => { ui.result = null; history.replaceState(null, "", "#gruppe"); startSession(); };
-  document.getElementById("toGroup").onclick = () => { ui.result = null; go("#gruppe", true); };
+  if(r.total && r.firstTry === r.total) launchConfetti();
+  document.getElementById("again").onclick = () => { const m = r.mix; ui.result = null; if(m) ui.mixIds = m; history.replaceState(null, "", m ? "#mix" : "#gruppe"); startSession(m); };
+  document.getElementById("toGroup").onclick = () => { const m = r.mix; ui.result = null; if(m) ui.mixIds = m; go(m ? "#mix" : "#gruppe", true); };
   window.scrollTo(0,0);
 }
 
-function speak(text){
+/* ---------- Konfetti, wenn eine Runde komplett richtig war ---------- */
+function launchConfetti(){
+  try{
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.querySelectorAll("canvas.confetti").forEach(c => c.remove());
+    const c = document.createElement("canvas");
+    c.className = "confetti"; c.setAttribute("aria-hidden", "true");
+    document.body.appendChild(c);
+    const dpr = window.devicePixelRatio || 1, W = window.innerWidth, H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    const x = c.getContext("2d"); x.scale(dpr, dpr);
+    const colors = ["#FFC83D", "#1F8F5C", "#E5484D", "#4FC3F7", "#F08C2E", "#B57EDC"];
+    const parts = [];
+    for(let i = 0; i < 160; i++){
+      const left = i % 2 === 0, delay = i < 80 ? 0 : 0.35;
+      parts.push({ x: left ? -10 : W + 10, y: H * .75, vx: (left ? 1 : -1) * (5 + Math.random() * 9), vy: -(12 + Math.random() * 10),
+        w: 7 + Math.random() * 6, h: 11 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - .5) * .35,
+        c: colors[i % colors.length], delay, flip: Math.random() * 6 });
+    }
+    const start = performance.now();
+    let last = start;
+    const frame = now => {
+      const t = (now - start) / 1000, dt = Math.min(.033, (now - last) / 1000) * 60; last = now;
+      x.clearRect(0, 0, W, H);
+      parts.forEach(p => {
+        if(t < p.delay) return;
+        p.vy += .32 * dt; p.vx *= Math.pow(.985, dt); p.vy *= Math.pow(.99, dt);
+        p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.flip += .15 * dt;
+        x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.scale(1, Math.cos(p.flip));
+        x.globalAlpha = Math.max(0, Math.min(1, (4.2 - t) / .8));
+        x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        x.restore();
+      });
+      if(t < 4.2 && document.body.contains(c)) requestAnimationFrame(frame); else c.remove();
+    };
+    requestAnimationFrame(frame);
+  }catch(e){}
+}
+
+// Medaille einer einzelnen Karte nach ihrem Lernstand: ab 2 Bronze, ab 4 Silber, 5 Gold
+function cardMedal(l){
+  const m = l >= 5 ? ["🥇", "Gold"] : l >= 4 ? ["🥈", "Silber"] : l >= 2 ? ["🥉", "Bronze"] : null;
+  return m ? `<span class="card-medal" title="${m[1]}">${m[0]}</span>` : `<span class="card-medal award-off" title="noch keine Medaille">🥉</span>`;
+}
+
+function speakWord(w){ speak(w.en, wordLang(w).speech); }
+function speak(text, voice){
   try{
     if(!("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-GB"; u.rate = .9;
+    u.lang = voice || "en-GB"; u.rate = .9;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -1587,7 +2040,10 @@ function cleanLines(text){
     return l;
   }).filter(l => l && !/^[\d\s.,;:!?()\-–—]*$/.test(l));
 }
-function langScore(t){ // > 0 eher Englisch, < 0 eher Deutsch
+let PARSE_LANG = "en";
+const FR_WORDS = new Set("le la les un une des de du et est à au aux en pour avec dans sur pas ne je tu il elle nous vous ils elles mon ma mes ton ta tes son sa ses ce cette qui que".split(" "));
+function langScore(t){ // > 0 eher Fremdsprache (Englisch oder Französisch), < 0 eher Deutsch
+  if(PARSE_LANG === "fr") return frScore(t);
   let s = 0;
   if(/[äöüß]/i.test(t)) s -= 4;
   t.split(/[\s,()]+/).filter(Boolean).forEach(w => {
@@ -1604,6 +2060,21 @@ function langScore(t){ // > 0 eher Englisch, < 0 eher Deutsch
 const sum = a => a.reduce((x,y) => x + y, 0);
 const SEP = /\t|\s[–—-]\s|\s*=\s*|\s*;\s*|\s*\|\s*|\s*→\s*|\s*:\s+|\s{2,}/;
 
+function frScore(t){
+  let s = 0;
+  if(/[äöüß]/i.test(t)) s -= 4;
+  if(/[éèêëàâîïôûùçœ]/i.test(t)) s += 3;
+  if(/\b[ldjmnst]['’]/i.test(t)) s += 2;
+  t.split(/[\s,()]+/).filter(Boolean).forEach(w => {
+    const lw = w.toLowerCase().replace(/[.!?;:]/g, "");
+    if(DE_WORDS.has(lw)) s -= 2;
+    if(FR_WORDS.has(lw)) s += 2;
+    if(/^[A-ZÄÖÜ][a-zäöüß]/.test(w)) s -= 1;
+    if(/tion$|eux$|eau$|oir$|ais$|ait$|ette$|ou$|oi|qu/.test(lw)) s += .7;
+    if(/sch|tz|ung$|keit$|heit$|chen$|lich$|ei/.test(lw)) s -= .7;
+  });
+  return s;
+}
 function bestRowSplit(line, orient){
   const w = line.split(/\s+/);
   if(w.length < 2) return [line, ""];
@@ -1635,23 +2106,24 @@ function parseOne(text){
     return Object.assign(orientPairs(L, R), { how:"sep" });
   }
   const multi = lines.filter(l => /\s/.test(l)).length;
-  if(multi < lines.length * .5 && lines.length >= 2){
-    // Spalten wurden nacheinander kopiert: erst alle Wörter der einen, dann der anderen Sprache
-    const n = lines.length, sc = lines.map(langScore);
-    let bestK = Math.ceil(n / 2), bestV = -Infinity;
-    for(let k = 1; k < n; k++){
-      const v = Math.abs(sum(sc.slice(0, k)) - sum(sc.slice(k))) - Math.abs(k - n / 2) * .3;
-      if(v > bestV){ bestV = v; bestK = k; }
-    }
-    if(bestV < 2) bestK = Math.ceil(n / 2);
-    return Object.assign(orientPairs(lines.slice(0, bestK), lines.slice(bestK)), { how:"col" });
+  // Variante A: Spalten wurden nacheinander kopiert (erst alle Wörter der einen, dann der anderen Sprache)
+  const n = lines.length, sc = lines.map(langScore);
+  let bestK = Math.ceil(n / 2), bestV = -Infinity;
+  for(let k = 1; k < n; k++){
+    const v = Math.abs(sum(sc.slice(0, k)) - sum(sc.slice(k))) - Math.abs(k - n / 2) * .3;
+    if(v > bestV){ bestV = v; bestK = k; }
   }
-  // Jede Zeile enthält ein Paar ohne Trennzeichen
+  // Variante B: jede Zeile enthält ein Paar ohne Trennzeichen
   const tries = [1, -1].map(o => {
     const p = lines.map(l => bestRowSplit(l, o));
     return { o, p, v: sum(p.map(([a,b]) => o * (langScore(a) - langScore(b)))) };
   });
   const t = tries[0].v >= tries[1].v ? tries[0] : tries[1];
+  const colWins = n >= 2 && (multi < n * .5 || (bestV > t.v && bestV >= 2));
+  if(colWins){
+    if(bestV < 2) bestK = Math.ceil(n / 2);
+    return Object.assign(orientPairs(lines.slice(0, bestK), lines.slice(bestK)), { how:"col" });
+  }
   const L = t.p.map(x => x[0]), R = t.p.map(x => x[1]);
   return t.o === 1 ? { en:L, de:R, swapped:false, how:"row" } : { en:R, de:L, swapped:true, how:"row" };
 }
@@ -1662,7 +2134,8 @@ function parseTwo(enText, deText){
 }
 
 function renderImport(){
-  const imp = ui.imp, g = group(ui.groupId);
+  const imp = ui.imp, g = group(ui.groupId), L = groupLang(g);
+  PARSE_LANG = L.key;
   if(imp.preview) return renderPreview();
   app.innerHTML = `
     <div class="topbar"><button class="back" id="back">‹ ${esc(g.name)}</button></div>
@@ -1681,8 +2154,8 @@ function renderImport(){
         <label class="field"><span>Ganze Liste</span>
           <textarea id="t" placeholder="dog – Hund&#10;cat – Katze&#10;to go – gehen">${esc(imp.text)}</textarea></label>
       ` : `
-        <p class="muted" style="font-size:.95rem;margin-bottom:10px">Kopiere zuerst nur die englische, dann nur die deutsche Spalte. Zeile 1 gehört zu Zeile 1.</p>
-        <label class="field"><span>🇬🇧 Englische Spalte</span>
+        <p class="muted" style="font-size:.95rem;margin-bottom:10px">Kopiere zuerst nur die ${L.adj}, dann nur die deutsche Spalte. Zeile 1 gehört zu Zeile 1.</p>
+        <label class="field"><span>${L.flag} Spalte ${L.name}</span>
           <textarea class="half" id="tEn" placeholder="dog&#10;cat&#10;to go" autocapitalize="none" spellcheck="false">${esc(imp.enText)}</textarea></label>
         <label class="field"><span>🇩🇪 Deutsche Spalte</span>
           <textarea class="half" id="tDe" placeholder="Hund&#10;Katze&#10;gehen">${esc(imp.deText)}</textarea></label>
@@ -1713,7 +2186,7 @@ function renderImport(){
 }
 
 function renderPreview(){
-  const imp = ui.imp, p = imp.preview, g = group(ui.groupId);
+  const imp = ui.imp, p = imp.preview, g = group(ui.groupId), L = groupLang(g);
   const existing = new Set(wordsOf(g.id).map(w => w.en.toLowerCase()));
   const rows = Math.max(p.en.length, p.de.length);
   const mismatch = p.en.length !== p.de.length;
@@ -1723,16 +2196,16 @@ function renderPreview(){
     <p class="muted">Prüfe die Paare. Tippe in ein Feld, um es zu korrigieren.</p>
     ${p.how === "photo" ? `<div class="note info">📷 Vom Foto gelesen. Bitte kurz prüfen, ob alles stimmt.</div>` : ""}
     ${p.swapped ? `<div class="note info">Links stand Deutsch. Die App hat die Spalten getauscht.</div>` : ""}
-    ${mismatch ? `<div class="note warn">${plural(p.en.length, "englische", "englische")}, aber ${plural(p.de.length, "deutsche", "deutsche")} Zeilen. Bitte prüfen, ab wo die Paare verrutscht sind. Mit ⋯ kannst du Zeilen verbinden oder löschen.</div>` : ""}
+    ${mismatch ? `<div class="note warn">${plural(p.en.length, L.adj, L.adj)}, aber ${plural(p.de.length, "deutsche", "deutsche")} Zeilen. Bitte prüfen, ab wo die Paare verrutscht sind. Mit ⋯ kannst du Zeilen verbinden oder löschen.</div>` : ""}
     <div class="pbar"><button class="btn ghost small" id="swap">⇄ Spalten tauschen</button></div>
     <section class="panel" style="padding:12px">
-      <div class="phead"><span></span><span>🇬🇧 Englisch</span><span>🇩🇪 Deutsch</span><span></span></div>
+      <div class="phead"><span></span><span>${L.flag} ${L.name}</span><span>🇩🇪 Deutsch</span><span></span></div>
       ${Array.from({ length: rows }, (_, i) => {
         const en = p.en[i] ?? "", de = p.de[i] ?? "";
         const dupe = en && existing.has(en.trim().toLowerCase());
         return `<div class="prow ${dupe ? "dupe" : ""}">
           <span class="pn">${i + 1}</span>
-          <input type="text" data-c="en" data-i="${i}" value="${esc(en)}" class="${en.trim() ? "" : "missing"}" autocapitalize="none" spellcheck="false" aria-label="Englisch Zeile ${i+1}">
+          <input type="text" data-c="en" data-i="${i}" value="${esc(en)}" class="${en.trim() ? "" : "missing"}" autocapitalize="none" spellcheck="false" aria-label="${L.name} Zeile ${i+1}">
           <input type="text" data-c="de" data-i="${i}" value="${esc(de)}" class="${de.trim() ? "" : "missing"}" aria-label="Deutsch Zeile ${i+1}">
           <button class="pmore" data-i="${i}" aria-label="Zeile ${i+1} bearbeiten">⋯</button>
         </div>${dupe ? `<p class="goal" style="margin:-4px 0 8px 2.2em">„${esc(en)}“ ist schon in der Gruppe und wird übersprungen.</p>` : ""}`;
@@ -1771,11 +2244,11 @@ function renderPreview(){
     const label = `Zeile ${i + 1}: ${(p.en[i] || "…")} – ${(p.de[i] || "…")}`;
     const opts = [
       { value:"row", label:"Ganze Zeile löschen" },
-      { value:"en", label:"Nur Englisch löschen, Rest rutscht hoch" },
+      { value:"en", label:`Nur ${L.name} löschen, Rest rutscht hoch` },
       { value:"de", label:"Nur Deutsch löschen, Rest rutscht hoch" }
     ];
     if(!last){
-      opts.push({ value:"joinEn", label:"Englisch mit nächster Zeile verbinden" });
+      opts.push({ value:"joinEn", label:`${L.name} mit nächster Zeile verbinden` });
       opts.push({ value:"joinDe", label:"Deutsch mit nächster Zeile verbinden" });
     }
     const c = await choose("Zeile bearbeiten", label, opts);
@@ -1819,6 +2292,7 @@ function renderBackup(){
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
         <button class="btn" id="exp">💾 Sicherung speichern</button>
         <button class="btn ghost" id="imp">📂 Sicherung laden</button>
+        ${defaultsAvailable() ? '<button class="btn ghost" id="loadDefaults">📚 Standard-Gruppen laden</button>' : ""}
       </div>
       <input type="file" id="impFile" accept=".json,application/json" hidden>
       <div class="msg" id="bmsg" aria-live="polite"></div>
@@ -1830,6 +2304,21 @@ function renderBackup(){
   document.getElementById("exp").onclick = e => exportBackup(e.currentTarget, bmsg);
   const file = document.getElementById("impFile");
   document.getElementById("imp").onclick = () => file.click();
+  const ld = document.getElementById("loadDefaults");
+  if(ld) ld.onclick = async () => {
+    ld.disabled = true;
+    try{
+      const d = await fetchDefaults();
+      if(!d){ bmsg.textContent = "Es wurden keine Standard-Gruppen gefunden."; bmsg.className = "msg err"; ld.disabled = false; return; }
+      const added = addDefaults(d, true);
+      ui.backupMsg = added.length
+        ? { kind:"ok", text:`${plural(added.length, "Standard-Gruppe", "Standard-Gruppen")} geladen.` }
+        : { kind:"ok", text:"Alle Standard-Gruppen sind schon da." };
+      renderBackup();
+    }catch(e){
+      bmsg.textContent = "Die Standard-Gruppen konnten nicht geladen werden. Bitte mit Internet versuchen."; bmsg.className = "msg err"; ld.disabled = false;
+    }
+  };
   file.onchange = () => { if(file.files[0]) importBackup(file.files[0], bmsg); file.value = ""; };
   window.scrollTo(0,0);
 }
@@ -1951,7 +2440,53 @@ function choose(title, text, options){
   });
 }
 
+/* ---------- Standard-Gruppen aus standard-gruppen.json (neben der App, z. B. auf GitHub Pages) ---------- */
+const DEFAULTS_FILE = "standard-gruppen.json";
+function defaultsAvailable(){ return !window.claude && location.protocol.startsWith("http"); }
+async function fetchDefaults(){
+  const r = await fetch(DEFAULTS_FILE + "?t=" + Date.now(), { cache: "no-store" });
+  if(!r.ok) return null;
+  const o = await r.json();
+  const d = o && o.data ? o.data : o;   // eine normale Sicherung oder nur {groups, words}
+  if(!d || !Array.isArray(d.groups) || !Array.isArray(d.words)) return null;
+  return d;
+}
+// Fügt Standard-Gruppen hinzu: Namen und Karten, ohne Fortschritt. force: auch früher gelöschte wieder holen
+function addDefaults(d, force){
+  if(!S.settings.defaultsSeen) S.settings.defaultsSeen = [];
+  const seen = new Set(S.settings.defaultsSeen), have = new Set(S.groups.map(g => g.id));
+  const added = [];
+  d.groups.forEach(src => {
+    if(!src || !src.id || !src.name) return;
+    if(have.has(src.id)){ seen.add(src.id); return; }
+    if(seen.has(src.id) && !force) return;
+    const g = { id: src.id, name: String(src.name), grade: +src.grade || S.settings.grade || null, lang: LANGS[src.lang] ? src.lang : "en", created: Date.now(), order: [], stars: 0, medals: {}, fromDefault: true };
+    S.groups.push(g);
+    d.words.filter(w => w && w.groupId === src.id && w.en && w.de).forEach(w => {
+      S.words.push({ id: uid(), groupId: g.id, en: String(w.en), de: String(w.de), level: { ende: 0, deen: 0 }, ml: {}, created: Date.now() });
+    });
+    seen.add(src.id); added.push(g);
+  });
+  S.settings.defaultsSeen = [...seen];
+  if(added.length) save();
+  return added;
+}
+async function loadDefaultsOnStart(){
+  if(!defaultsAvailable()) return;
+  try{
+    const d = await fetchDefaults();
+    if(!d) return;
+    const added = addDefaults(d, false);
+    if(added.length && !ui.session && (location.hash === "" || location.hash === "#start")){
+      const mine = added.filter(g => g.grade === S.settings.grade && g.lang === (S.settings.lang || "en")).length;
+      if(mine) ui.homeNote = `📚 ${plural(mine, "neue Gruppe", "neue Gruppen")} hinzugefügt.`;
+      render();
+    }
+  }catch(e){}
+}
+
 render();
+loadDefaultsOnStart();
 })();
 
 </script>

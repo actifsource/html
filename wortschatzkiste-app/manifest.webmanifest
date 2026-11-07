@@ -1,7 +1,7 @@
 {
   "name": "Wortschatzkiste",
   "short_name": "Wortschatz",
-  "description": "Englisch-Vokabeln sammeln und üben",
+  "description": "Vokabeln sammeln und üben",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
