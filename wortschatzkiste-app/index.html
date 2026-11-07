@@ -1526,7 +1526,7 @@ function startSession(mixIds){
     stack = shuffle(S.words.filter(w => mix.includes(w.groupId))).sort((a, b) => lv(a) - lv(b)).map(w => w.id);
   } else stack = stackOf(group(ui.groupId));
   save();
-  ui.session = { target: Math.min(ROUND_SIZE, stack.length), done: 0, firstTry: 0, missed: new Set(),
+  ui.session = { target: stack.length, done: 0, firstTry: 0, missed: new Set(), doneSet: new Set(),
     flipped: false, dir: null, type: null, lastType: null, mode: modeOf(S.settings.mode).key, state: null,
     mix, mixStack: mix ? stack : null, perGroup: {} };
   pickDir();
@@ -1886,7 +1886,15 @@ function answer(knew){
     s.missed.add(id);
     label = "🔁 Kommt gleich wieder";
   }
-  const pos = sortBackPosition(w.level[s.dir], stack.length);
+  // In einer Runde kommen alle Karten dran: gewusste Karten wandern hinter alle, die in dieser Runde noch fehlen
+  if(knew) s.doneSet.add(id);
+  let pos = sortBackPosition(w.level[s.dir], stack.length);
+  if(knew){
+    const open = stack.filter(x => !s.doneSet.has(x)).length;
+    let k = 0, after = 0;
+    for(; after < stack.length && k < open; after++) if(!s.doneSet.has(stack[after])) k++;
+    pos = Math.max(pos, after);
+  }
   stack.splice(pos, 0, id);
   save();
 
