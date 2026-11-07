@@ -109,7 +109,7 @@ input[type=text]{
 .words li button:disabled{color:inherit; cursor:default; opacity:1}
 
 .hero-top{display:flex; justify-content:space-between; align-items:flex-start}
-.hero-actions{display:flex; gap:10px}
+.hero-actions{display:flex; gap:8px}
 .backup-btn{min-width:52px; min-height:52px; font-size:1.5rem; border-radius:14px}
 
 /* Gruppen zusammen üben */
@@ -143,6 +143,33 @@ body{overflow-x:hidden}
 .info-video{border-radius:18px; overflow:hidden; background:#000; box-shadow:var(--shadow); margin:10px 0 6px}
 .info-video video{display:block; width:100%; height:auto; max-height:60vh}
 .info-steps{margin:0; padding-left:1.4em; display:flex; flex-direction:column; gap:10px; line-height:1.35}
+
+/* Werkstatt */
+.wallet{font-weight:800; font-size:1.2rem; background:var(--surface); border-radius:999px; padding:6px 14px; box-shadow:var(--shadow)}
+.car-stage{position:relative; margin:12px 0 14px; border-radius:22px; overflow:hidden; cursor:pointer;
+  background:linear-gradient(#BFE6F7 0%, #E6F5FB 62%, #9BCB8F 62%, #86B97A 100%); box-shadow:var(--shadow); touch-action:manipulation}
+.car-svg{display:block; width:100%; height:auto; position:relative; z-index:1; overflow:visible; margin-top:16px}
+.car-svg .car-wheel{transform-box:fill-box; transform-origin:center}
+.car-svg .car-body{transform-box:fill-box; transform-origin:80% 100%}
+.car-flames{opacity:0; transition:opacity .15s}
+.car-flames.on{opacity:1; animation:flicker .12s infinite alternate}
+@keyframes flicker{to{transform:scaleX(1.15) translateX(-3px)}}
+.car-road{position:absolute; left:0; right:0; bottom:10px; height:18px; background:#5B6573; z-index:0}
+.car-road::after{content:""; position:absolute; left:0; right:0; top:8px; height:2px; background:repeating-linear-gradient(90deg, #FFFFFF 0 22px, transparent 22px 44px)}
+.car-hint{position:absolute; right:10px; top:8px; font-size:.85rem; font-weight:700; color:#15302A; background:rgba(255,255,255,.75); border-radius:999px; padding:2px 10px; z-index:2}
+.garage-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:8px; scrollbar-width:none}
+.garage-tabs button{flex:none; border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:6px 12px; font:inherit; font-weight:700; color:var(--ink); min-height:42px}
+.garage-tabs button[aria-selected="true"]{background:var(--chalk); border-color:var(--chalk); color:var(--chalk-ink)}
+.garage-items{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px}
+.g-item{display:flex; flex-direction:column; align-items:center; gap:4px; border:3px solid transparent; background:var(--surface); border-radius:16px; padding:10px 6px; font:inherit; color:var(--ink); box-shadow:var(--shadow); min-height:104px}
+.g-item.on{border-color:var(--good)}
+.g-item:active{transform:translateY(2px)}
+.swatch{width:34px; height:34px; border-radius:50%; border:2px solid rgba(0,0,0,.15)}
+.g-icon{font-size:1.8rem; line-height:1}
+.g-name{font-size:.85rem; font-weight:700; text-align:center; line-height:1.15}
+.g-price{font-size:.8rem; font-weight:800; color:var(--muted)}
+.g-item:not(.owned) .g-price{color:var(--chalk-ink); background:var(--chalk); border-radius:999px; padding:1px 8px}
+.g-item.on .g-price{color:var(--good)}
 
 /* Konfetti */
 canvas.confetti{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:50}
@@ -451,6 +478,7 @@ function migrate(d){
   if(!d.settings) d.settings = {};
   if(!d.settings.mode) d.settings.mode = d.settings.advanced ? "profi" : "normal";
   if(!d.settings.lang) d.settings.lang = "en";
+  if(!d.garage) d.garage = { owned:{}, equip:{}, spent:0 };
   d.groups.forEach(g => { if(!g.lang) g.lang = "en"; });
   delete d.settings.advanced;
   d.groups.forEach(g => {
@@ -506,9 +534,15 @@ const MEDALS = [
   { key:"gold", icon:"🥇", name:"Gold", need:5, test: (ws, L) => avgLevel(ws, L) >= 5 }
 ];
 const MIN_CARDS_FOR_MEDAL = 1;
-const TROPHY_STEPS = [10, 25, 50, 100, 200, 400];
-function trophies(g){ return TROPHY_STEPS.filter(n => (g.stars || 0) >= n).length; }
-function nextTrophy(g){ return TROPHY_STEPS.find(n => g.stars < n); }
+// Pokale bei 10, 25 und 50 Sternen, danach alle 50 Sterne ein weiterer (100, 150, 200 …)
+function trophies(g){
+  const s = g.stars || 0;
+  return (s >= 10 ? 1 : 0) + (s >= 25 ? 1 : 0) + (s >= 50 ? 1 + Math.floor((s - 50) / 50) : 0);
+}
+function nextTrophy(g){
+  const s = g.stars || 0;
+  return s < 10 ? 10 : s < 25 ? 25 : 50 * (Math.floor(s / 50) + 1);
+}
 function starsForRound(ratio){ return ratio >= .9 ? 3 : ratio >= .6 ? 2 : 1; }
 // Lernstand pro Stufe: „Im Kopf“ nutzt den normalen Stand, Tippen und Profi zählen eigene Serien
 // Jede Stufe zählt ihre eigene Serie (0 bis 5); der allgemeine Lernstand bestimmt nur die Reihenfolge im Stapel
@@ -592,6 +626,7 @@ function render(){
   if(h === "#import" && ui.imp && group(ui.groupId)) return renderImport();
   if(h === "#sicherung") return renderBackup();
   if(h === "#info") return renderInfo();
+  if(h === "#werkstatt") return renderGarage();
   if(h === "#mix" && ui.mixIds) return renderMixPage();
   if(h && h !== "#start"){ history.replaceState(null, "", location.pathname + location.search); }
   renderHome();
@@ -617,6 +652,7 @@ function renderHome(){
         <div class="hero-actions">
           <button class="icon-btn backup-btn" id="addGroupTop" aria-label="Neue Gruppe anlegen" title="Neue Gruppe">➕</button>
           <button class="icon-btn backup-btn" id="openBackup" aria-label="Sicherung öffnen" title="Sicherung">💾</button>
+          <button class="icon-btn backup-btn" id="openGarage" aria-label="Werkstatt" title="Werkstatt">🏎️</button>
           <button class="icon-btn backup-btn" id="openInfo" aria-label="So funktioniert’s" title="So funktioniert’s">ℹ️</button>
         </div>
       </div>
@@ -748,6 +784,7 @@ function renderHome(){
   }
   document.getElementById("openBackup").onclick = () => go("#sicherung");
   document.getElementById("openInfo").onclick = () => go("#info");
+  document.getElementById("openGarage").onclick = () => go("#werkstatt");
   window.scrollTo(0,0);
 }
 
@@ -771,6 +808,226 @@ function renderGradePick(first){
     save();
     ui.select = null;
     go("#start", true);
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Werkstatt: mit Pokalen ein Auto bauen ---------- */
+const GARAGE = {
+  model: { name:"Modell", icon:"🚗", items:[
+    { id:"flitzer", name:"Flitzer", icon:"🏎️", price:0 },
+    { id:"gelaende", name:"Geländewagen", icon:"🚙", price:3 },
+    { id:"bus", name:"Kleinbus", icon:"🚐", price:3 } ] },
+  color: { name:"Farbe", icon:"🎨", items:[
+    { id:"rot", name:"Rot", c:"#E5484D", price:0 }, { id:"blau", name:"Blau", c:"#3B82F6", price:0 },
+    { id:"gruen", name:"Grün", c:"#22A06B", price:0 }, { id:"gelb", name:"Gelb", c:"#FFC83D", price:0 },
+    { id:"schwarz", name:"Schwarz", c:"#23272F", price:1 }, { id:"silber", name:"Silber metallic", g:["#F1F3F6","#8E98A5"], price:1 },
+    { id:"gold", name:"Gold", g:["#FFE69A","#C08A00"], price:2 }, { id:"glitzer", name:"Glitzer-Lila", g:["#C99BF0","#5B2D97"], sparkle:true, price:2 },
+    { id:"regenbogen", name:"Regenbogen", rainbow:true, price:3 } ] },
+  wheels: { name:"Felgen", icon:"🛞", items:[
+    { id:"basic", name:"Standard", price:0 }, { id:"sport", name:"Sport", price:1 },
+    { id:"stern", name:"Stern", price:2 }, { id:"chrom", name:"Chrom", price:2 }, { id:"breit", name:"Breitreifen", price:3 } ] },
+  spoiler: { name:"Spoiler", icon:"🪽", items:[
+    { id:"none", name:"Ohne", icon:"🚫", price:0 }, { id:"klein", name:"Klein", icon:"🪽", price:1 },
+    { id:"gross", name:"Groß", icon:"🪽", price:2 }, { id:"fluegel", name:"Rennflügel", icon:"🏁", price:3 } ] },
+  engine: { name:"Motor", icon:"⚙️", items:[
+    { id:"e1", name:"Stufe 1", icon:"🔧", price:0 }, { id:"e2", name:"Stufe 2", icon:"⚙️", price:2 }, { id:"e3", name:"Turbo", icon:"🚀", price:3 } ] },
+  exhaust: { name:"Auspuff", icon:"💨", items:[
+    { id:"none", name:"Standard", icon:"💨", price:0 }, { id:"doppel", name:"Doppelrohr", icon:"🎺", price:1 }, { id:"flammen", name:"Flammen", icon:"🔥", price:3 } ] },
+  light: { name:"Licht", icon:"💡", items:[
+    { id:"none", name:"Ohne", icon:"🚫", price:0 }, { id:"blau", name:"Neon Blau", c:"#38BDF8", price:1 },
+    { id:"pink", name:"Neon Pink", c:"#F472B6", price:1 }, { id:"gruen", name:"Neon Grün", c:"#4ADE80", price:1 },
+    { id:"regenbogen", name:"Neon Regenbogen", rainbow:true, price:2 } ] },
+  sticker: { name:"Aufkleber", icon:"⭐", items:[
+    { id:"none", name:"Ohne", icon:"🚫", price:0 }, { id:"sterne", name:"Sterne", icon:"✨", price:1 }, { id:"nummer", name:"Startnummer", icon:"7️⃣", price:1 },
+    { id:"blitz", name:"Blitz", icon:"⚡", price:1 }, { id:"flammen", name:"Flammen", icon:"🔥", price:2 } ] }
+};
+// Zweitfarbe nutzt dieselben Farben wie die Hauptfarbe (gekauft ist gekauft)
+GARAGE.color2 = { name:"Zweitfarbe", icon:"🖌️", shares:"color", items:[{ id:"none", name:"Keine", icon:"🚫", price:0 }].concat(GARAGE.color.items) };
+GARAGE.sticker.multi = true;   // mehrere Aufkleber gleichzeitig
+const GARAGE_TABS = ["model", "color", "color2", "wheels", "spoiler", "engine", "exhaust", "light", "sticker"];
+function garage(){
+  if(!S.garage) S.garage = { owned:{}, equip:{}, spent:0 };
+  const G = S.garage;
+  GARAGE_TABS.forEach(cat => { if(!G.equip[cat]) G.equip[cat] = GARAGE[cat].items[0].id; });
+  if(!Array.isArray(G.equip.sticker)) G.equip.sticker = G.equip.sticker && G.equip.sticker !== "none" ? [G.equip.sticker] : [];
+  return G;
+}
+function trophiesTotal(){ return S.groups.reduce((a, g) => a + trophies(g), 0); }
+function wallet(){ return Math.max(0, trophiesTotal() - (garage().spent || 0)); }
+function ownKey(cat, item){ return (GARAGE[cat].shares || cat) + ":" + item.id; }
+function isOwned(cat, item){ return item.price === 0 || !!garage().owned[ownKey(cat, item)]; }
+function isOn(cat, id){ const v = garage().equip[cat]; return GARAGE[cat].multi ? (id === "none" ? !v.length : v.includes(id)) : v === id; }
+function gItem(cat, id){ return GARAGE[cat].items.find(i => i.id === id) || GARAGE[cat].items[0]; }
+
+// Zeichnet das Auto als SVG (Seitenansicht, fährt nach rechts)
+function carSVG(eq){
+  const model = eq.model, col = gItem("color", eq.color), col2 = eq.color2 && eq.color2 !== "none" ? gItem("color", eq.color2) : null;
+  const wh = eq.wheels, sp = eq.spoiler, ex = eq.exhaust, li = gItem("light", eq.light);
+  const stl = Array.isArray(eq.sticker) ? eq.sticker : (eq.sticker && eq.sticker !== "none" ? [eq.sticker] : []);
+  const M = {
+    flitzer: { body:"M30,132 Q30,106 70,101 L132,96 Q162,62 216,60 L258,62 Q300,70 330,98 L366,106 Q380,112 378,132 Z",
+      win:"M152,96 Q172,72 214,70 L250,72 Q274,78 296,97 Z", div:"M222,71 L224,97", wheels:[[102,136],[302,136]], r:27, ax:42, ay:102, ex:[30,124] },
+    gelaende: { body:"M30,142 L32,98 Q34,86 50,85 L110,83 L136,46 L286,46 Q300,47 310,60 L342,84 L366,88 Q378,92 378,108 L378,142 Z",
+      win:"M146,83 L163,57 L280,57 L304,83 Z", div:"M222,57 L222,83", wheels:[[106,142],[296,142]], r:33, ax:40, ay:84, ex:[30,134] },
+    bus: { body:"M30,142 L30,72 Q30,40 72,38 L298,38 Q338,40 360,80 L372,100 Q378,112 378,142 Z",
+      win:"M62,52 L132,52 L132,90 L62,90 Z M146,52 L216,52 L216,90 L146,90 Z M230,52 L300,52 Q322,56 336,90 L230,90 Z", div:"", wheels:[[100,142],[300,142]], r:28, ax:36, ay:44, ex:[30,134] }
+  }[model] || null;
+  const m = M || { body:"", win:"", div:"", wheels:[], r:27 };
+  let defs = `<filter id="glow" x="-30%" y="-200%" width="160%" height="500%"><feGaussianBlur stdDeviation="9"/></filter>`;
+  const paint = (c, id) => {
+    if(c.g){ defs += `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.g[0]}"/><stop offset="1" stop-color="${c.g[1]}"/></linearGradient>`; return `url(#${id})`; }
+    if(c.rainbow){ defs += `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${["#E5484D","#F08C2E","#FFC83D","#22A06B","#3B82F6","#8B5CF6"].map((x, i) => `<stop offset="${i / 5}" stop-color="${x}"/>`).join("")}</linearGradient>`; return `url(#${id})`; }
+    return c.c || "#E5484D";
+  };
+  const fill = paint(col, "paint");
+  const fill2 = col2 ? paint(col2, "paint2") : null;
+  defs += `<clipPath id="bodyclip"><path d="${m.body}"/></clipPath>`;
+  const cutY = { flitzer:116, gelaende:110, bus:104 }[model] || 116;
+  const twoTone = fill2 ? `<g clip-path="url(#bodyclip)"><rect x="0" y="${cutY}" width="420" height="120" fill="${fill2}"/><rect x="0" y="${cutY - 2}" width="420" height="3" fill="rgba(0,0,0,.22)"/></g>` : "";
+  if(li.rainbow) defs += `<linearGradient id="neon" x1="0" y1="0" x2="1" y2="0">${["#F472B6","#FFC83D","#4ADE80","#38BDF8","#A78BFA"].map((c, i) => `<stop offset="${i / 4}" stop-color="${c}"/>`).join("")}</linearGradient>`;
+  defs += `<linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#AEB6C1"/><stop offset="1" stop-color="#5B6573"/></linearGradient>`;
+  const glow = eq.light !== "none" ? `<ellipse cx="204" cy="${m.wheels[0][1] + m.r - 2}" rx="170" ry="12" fill="${li.rainbow ? "url(#neon)" : li.c}" filter="url(#glow)" opacity=".95"/>` : "";
+  const wing = (() => {
+    const x = m.ax, y = m.ay;
+    if(sp === "klein") return `<path d="M${x - 6},${y - 4} L${x + 34},${y - 8} L${x + 36},${y - 2} L${x - 4},${y + 2} Z" fill="#23272F"/>`;
+    if(sp === "gross") return `<rect x="${x + 6}" y="${y - 16}" width="5" height="16" fill="#23272F"/><path d="M${x - 10},${y - 22} L${x + 44},${y - 26} L${x + 46},${y - 17} L${x - 8},${y - 14} Z" fill="#23272F"/>`;
+    if(sp === "fluegel") return `<rect x="${x + 2}" y="${y - 26}" width="5" height="26" fill="#23272F"/><rect x="${x + 26}" y="${y - 26}" width="5" height="26" fill="#23272F"/><path d="M${x - 14},${y - 34} L${x + 52},${y - 38} L${x + 54},${y - 26} L${x - 12},${y - 24} Z" fill="${fill}" stroke="#23272F" stroke-width="3"/>`;
+    return "";
+  })();
+  const pipes = (ex === "doppel" || ex === "flammen")
+    ? `<rect x="${m.ex[0] - 14}" y="${m.ex[1]}" width="16" height="6" rx="3" fill="url(#chrome)"/><rect x="${m.ex[0] - 14}" y="${m.ex[1] - 8}" width="16" height="6" rx="3" fill="url(#chrome)"/>`
+    : `<rect x="${m.ex[0] - 10}" y="${m.ex[1]}" width="12" height="5" rx="2" fill="#5B6573"/>`;
+  const flames = ex === "flammen" ? `<g class="car-flames"><path d="M${m.ex[0] - 14},${m.ex[1] - 6} Q${m.ex[0] - 40},${m.ex[1] - 2} ${m.ex[0] - 58},${m.ex[1] + 2} Q${m.ex[0] - 38},${m.ex[1] + 6} ${m.ex[0] - 14},${m.ex[1] + 6} Z" fill="#FF7A1A"/><path d="M${m.ex[0] - 14},${m.ex[1] - 3} Q${m.ex[0] - 30},${m.ex[1]} ${m.ex[0] - 40},${m.ex[1] + 2} Q${m.ex[0] - 28},${m.ex[1] + 4} ${m.ex[0] - 14},${m.ex[1] + 4} Z" fill="#FFE066"/></g>` : "";
+  // Aufkleber lassen sich kombinieren; jeder hat seinen eigenen Platz auf dem Auto
+  const ny = model === "flitzer" ? 116 : 114;
+  const stickers = stl.map(st => {
+    if(st === "sterne") return [[92,120,8],[114,108,5],[132,124,6]].map(([x, y, r]) => `<path d="${starPath(x, y, r)}" fill="#FFFFFF" opacity=".9"/>`).join("");
+    if(st === "nummer") return `<circle cx="262" cy="${ny}" r="15" fill="#FFFFFF" stroke="#15302A" stroke-width="1.5"/><text x="262" y="${ny + 6}" text-anchor="middle" font-size="19" font-weight="800" font-family="Baloo 2, system-ui, sans-serif" fill="#15302A">7</text>`;
+    if(st === "blitz") return `<path d="M168,104 L202,104 L189,115 L226,115 L174,135 L189,122 L158,122 Z" fill="#FFE066" stroke="#15302A" stroke-width="2"/>`;
+    if(st === "flammen") return `<path d="M372,118 Q336,106 306,113 Q318,117 296,121 Q312,125 288,129 Q326,134 372,130 Z" fill="#FF7A1A"/><path d="M372,121 Q346,115 326,119 Q338,122 320,125 Q346,128 372,127 Z" fill="#FFE066"/>`;
+    return "";
+  }).join("");
+  const sparkles = col.sparkle ? [[90,118],[140,110],[230,104],[300,112],[340,120],[200,126]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="#FFFFFF" opacity=".85"/>`).join("") : "";
+  const wheelsSvg = m.wheels.map(([x, y]) => {
+    const r = wh === "breit" ? m.r + 4 : m.r, ri = r * .56;
+    let rim = `<circle cx="${x}" cy="${y}" r="${ri}" fill="#B9C0CA"/><circle cx="${x}" cy="${y}" r="${ri * .35}" fill="#7A8491"/>`;
+    if(wh === "sport") rim = `<circle cx="${x}" cy="${y}" r="${ri}" fill="#2B2F36"/>` + [0, 72, 144, 216, 288].map(a => `<line x1="${x}" y1="${y}" x2="${x + ri * Math.cos(a * Math.PI / 180)}" y2="${y + ri * Math.sin(a * Math.PI / 180)}" stroke="#E5484D" stroke-width="4" stroke-linecap="round"/>`).join("") + `<circle cx="${x}" cy="${y}" r="4" fill="#E5484D"/>`;
+    if(wh === "stern") rim = `<circle cx="${x}" cy="${y}" r="${ri}" fill="#2B2F36"/><path d="${starPath(x, y, ri * .9)}" fill="#FFC83D"/>`;
+    if(wh === "chrom" || wh === "breit") rim = `<circle cx="${x}" cy="${y}" r="${ri}" fill="url(#chrome)"/><circle cx="${x}" cy="${y}" r="${ri * .45}" fill="none" stroke="#5B6573" stroke-width="2"/>` + [0, 60, 120].map(a => `<line x1="${x - ri * .9 * Math.cos(a * Math.PI / 180)}" y1="${y - ri * .9 * Math.sin(a * Math.PI / 180)}" x2="${x + ri * .9 * Math.cos(a * Math.PI / 180)}" y2="${y + ri * .9 * Math.sin(a * Math.PI / 180)}" stroke="#5B6573" stroke-width="2"/>`).join("");
+    return `<g class="car-wheel"><circle cx="${x}" cy="${y}" r="${r}" fill="#1B1D21"/><circle cx="${x}" cy="${y}" r="${r - 3}" fill="none" stroke="#3A3F47" stroke-width="${wh === "breit" ? 5 : 2}"/>${rim}</g>`;
+  }).join("");
+  return `<svg class="car-svg" viewBox="-60 0 460 200" role="img" aria-label="Dein Auto"><defs>${defs}</defs>${glow}
+    <g class="car-body">${flames}${pipes}${wing}
+      <g ${model === "flitzer" ? 'transform="translate(408,0) scale(-1,1)"' : ""}>
+      <path d="${m.body}" fill="${fill}"/>${twoTone}
+      <path d="${m.body}" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="${m.body}" fill="#FFFFFF" opacity=".12" transform="translate(0,-4) scale(1,.92)" style="transform-origin:200px 60px"/>
+      <path d="${m.win}" fill="#BFE3F5" stroke="rgba(0,0,0,.25)" stroke-width="2"/>${m.div ? `<path d="${m.div}" stroke="rgba(0,0,0,.3)" stroke-width="3"/>` : ""}</g>
+      ${sparkles}
+      <circle cx="${model === "flitzer" ? 368 : 370}" cy="${model === "flitzer" ? 121 : 106}" r="5" fill="#FFF6C2"/>${stickers}</g>
+    ${wheelsSvg}</svg>`;
+}
+function starPath(x, y, r){
+  let d = "";
+  for(let i = 0; i < 10; i++){ const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; d += (i ? "L" : "M") + (x + rr * Math.cos(a)).toFixed(1) + "," + (y + rr * Math.sin(a)).toFixed(1); }
+  return d + "Z";
+}
+function engineSound(level){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+    const ctx = new AC(), t = ctx.currentTime, dur = 1.1 - level * .12;
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = "sawtooth"; f.type = "lowpass"; f.frequency.value = 500 + level * 350;
+    const base = 48 + level * 14;
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(base * (2.2 + level * .4), t + dur * .45);
+    o.frequency.exponentialRampToValueAtTime(base * 1.1, t + dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16, t + .05); g.gain.linearRampToValueAtTime(.12, t + dur * .6); g.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(f); f.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + dur + .05);
+    setTimeout(() => ctx.close(), (dur + .3) * 1000);
+  }catch(e){}
+}
+function driveCar(svg, level){
+  if(!svg || svg.dataset.driving) return;
+  svg.dataset.driving = "1";
+  const dur = [1200, 950, 750][level - 1] || 1200, dist = [60, 90, 120][level - 1] || 60;
+  const body = svg.querySelector(".car-body");
+  const all = [svg.querySelector(".car-body"), ...svg.querySelectorAll(".car-wheel")];
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  engineSound(level);
+  const fl = svg.querySelector(".car-flames"); if(fl) fl.classList.add("on");
+  if(!reduce){
+    svg.animate([{ transform:"translateX(0)" }, { transform:"translateX(-6px)", offset:.12 }, { transform:`translateX(${dist}px)`, offset:.6 }, { transform:"translateX(0)" }], { duration: dur, easing:"ease-in-out" });
+    body.animate([{ transform:"rotate(0)" }, { transform:"rotate(-2deg)", offset:.2 }, { transform:"rotate(0)", offset:.6 }, { transform:"rotate(0)" }], { duration: dur });
+    svg.querySelectorAll(".car-wheel").forEach(w => w.animate([{ transform:"rotate(0)" }, { transform:"rotate(720deg)" }], { duration: dur, easing:"ease-in-out" }));
+  }
+  const puff = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  svg.appendChild(puff);
+  for(let i = 0; i < 4; i++){
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", "0"); c.setAttribute("cy", "128"); c.setAttribute("r", "8"); c.setAttribute("fill", "#C9D1D9");
+    puff.appendChild(c);
+    if(!reduce) c.animate([{ transform:"translate(0,0) scale(.4)", opacity:.8 }, { transform:`translate(${-40 - i * 14}px,${-8 - i * 4}px) scale(${1.4 + i * .3})`, opacity:0 }], { duration: 700 + i * 120, delay: i * 90, fill:"forwards" });
+  }
+  setTimeout(() => { puff.remove(); if(fl) fl.classList.remove("on"); delete svg.dataset.driving; }, dur + 400);
+}
+
+function renderGarage(){
+  const G = garage(), tab = ui.garageTab || "model", eq = G.equip, total = trophiesTotal(), money = wallet();
+  app.innerHTML = banner() + `
+    <div class="topbar"><button class="back" id="back">‹ Gruppen</button>
+      <span class="wallet" aria-label="${money} Pokale verfügbar">🏆 ${money}</span></div>
+    <h1>🏎️ Werkstatt</h1>
+    <p class="muted">Bau dein Auto mit deinen Pokalen. Du hast bisher ${plural(total, "Pokal", "Pokale")} verdient.</p>
+    <div class="car-stage" id="carStage" role="button" tabindex="0" aria-label="Auto fahren lassen">
+      ${carSVG(eq)}
+      <div class="car-road"></div>
+      <div class="car-hint">Tippe aufs Auto, dann fährt es!</div>
+    </div>
+    <div class="garage-tabs" role="tablist">${GARAGE_TABS.map(c => `<button role="tab" data-tab="${c}" aria-selected="${c === tab}">${GARAGE[c].icon} ${GARAGE[c].name}</button>`).join("")}</div>
+    ${GARAGE[tab].multi ? '<p class="goal" style="margin:0 0 8px">Du kannst mehrere Aufkleber gleichzeitig aufkleben. Nochmal antippen nimmt einen ab.</p>'
+      : tab === "color2" ? '<p class="goal" style="margin:0 0 8px">Die untere Hälfte des Autos bekommt eine zweite Farbe. Gekaufte Farben gelten für beide.</p>' : ""}
+    <div class="garage-items">${GARAGE[tab].items.map(it => {
+      const owned = isOwned(tab, it), on = isOn(tab, it.id);
+      const sw = it.rainbow ? "linear-gradient(90deg,#E5484D,#FFC83D,#22A06B,#3B82F6,#8B5CF6)" : it.g ? `linear-gradient(${it.g[0]},${it.g[1]})` : it.c || "";
+      const icon = sw ? `<span class="swatch" style="background:${sw}"></span>` : `<span class="g-icon">${it.icon || GARAGE[tab].icon}</span>`;
+      return `<button class="g-item ${on ? "on" : ""} ${owned ? "owned" : ""}" data-item="${it.id}">
+        ${icon}<span class="g-name">${it.name}</span>
+        <span class="g-price">${on ? "✓ Am Auto" : it.price === 0 ? "Gratis" : owned ? "Gekauft" : `🏆 ${it.price}`}</span></button>`;
+    }).join("")}</div>
+    <div class="msg" id="gmsg" aria-live="polite"></div>`;
+  document.getElementById("back").onclick = () => go("#start");
+  const stage = document.getElementById("carStage");
+  const drive = () => driveCar(stage.querySelector(".car-svg"), +gItem("engine", eq.engine).id.slice(1) || 1);
+  stage.onclick = drive;
+  stage.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); drive(); } };
+  app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { ui.garageTab = b.dataset.tab; renderGarage(); });
+  const msg = document.getElementById("gmsg");
+  if(ui.garageMsg){ msg.textContent = ui.garageMsg.text; msg.className = "msg " + ui.garageMsg.kind; ui.garageMsg = null; }
+  app.querySelectorAll("[data-item]").forEach(b => b.onclick = async () => {
+    const it = gItem(tab, b.dataset.item);
+    const equip = () => {
+      if(GARAGE[tab].multi){
+        if(it.id === "none") G.equip[tab] = [];
+        else G.equip[tab] = G.equip[tab].includes(it.id) ? G.equip[tab].filter(x => x !== it.id) : G.equip[tab].concat(it.id);
+      } else G.equip[tab] = it.id;
+    };
+    if(isOwned(tab, it)){ equip(); save(); renderGarage(); return; }
+    if(wallet() < it.price){
+      msg.textContent = `Dafür brauchst du noch ${plural(it.price - wallet(), "Pokal", "Pokale")} mehr. Üb weiter!`; msg.className = "msg err"; return;
+    }
+    const c = await choose(`„${it.name}“ kaufen?`, `Kostet ${plural(it.price, "Pokal", "Pokale")}. Danach hast du noch ${plural(wallet() - it.price, "Pokal", "Pokale")}.`,
+      [{ value:"yes", label:`🏆 Für ${it.price} kaufen`, primary:true }]);
+    if(!c) return;
+    G.owned[ownKey(tab, it)] = true; G.spent = (G.spent || 0) + it.price;
+    if(GARAGE[tab].multi){ if(!G.equip[tab].includes(it.id)) G.equip[tab] = G.equip[tab].concat(it.id); } else G.equip[tab] = it.id;
+    save();
+    ui.garageMsg = { kind:"ok", text:`🎉 ${it.name} gekauft und eingebaut!` };
+    renderGarage();
+    launchConfetti();
+    setTimeout(() => driveCar(document.querySelector("#carStage .car-svg"), +gItem("engine", G.equip.engine).id.slice(1) || 1), 300);
   });
   window.scrollTo(0, 0);
 }
@@ -1962,7 +2219,8 @@ function renderResult(){
     </div>
     ${r.medals.filter(x => x.won).map(x => `<div class="new-award big-${x.mode.key}"><span class="icon">${x.medal.icon}</span><span>Neue ${x.mode.name}-${x.medal.name}-Medaille! ${x.mode.icon}${r.mix ? ` (${esc(x.group)})` : ""}</span></div>`).join("")}
     ${r.medals.filter(x => !x.won).map(x => `<div class="lost-award"><span class="icon award-off">${x.medal.icon}</span><span>${x.mode.name}-${x.medal.name} verloren${r.mix ? ` (${esc(x.group)})` : ""}. Üb weiter, dann holst du sie zurück!</span></div>`).join("")}
-    ${r.newTrophy ? `<div class="new-award"><span class="icon">🏆</span><span>Neuer Pokal${r.mix ? ` für ${esc(r.newTrophy.name)}` : ""}! ${r.newTrophy.stars} Sterne gesammelt.</span></div>` : ""}
+    ${r.newTrophy ? `<div class="new-award"><span class="icon">🏆</span><span>Neuer Pokal${r.mix ? ` für ${esc(r.newTrophy.name)}` : ""}! ${r.newTrophy.stars} Sterne gesammelt.</span></div>
+      <button class="btn ghost" id="toGarage" style="margin:4px 0 10px">🏎️ Ab in die Werkstatt</button>` : ""}
     ${missed.length ? `<section class="panel missed">
       <h2 style="margin-top:0">Diese Karten liegen weiter vorne im Stapel</h2>
       <ul class="words">${missed.map(w => `<li><button tabindex="-1" style="cursor:default"><span class="dot" style="background:var(--b1)"></span><span class="pair"><span class="en">${esc(w.en)}</span> <span class="de">– ${esc(w.de)}</span></span></button></li>`).join("")}</ul>
@@ -1973,6 +2231,7 @@ function renderResult(){
     </div>
   `;
   if(r.total && r.firstTry === r.total) launchConfetti();
+  const tg = document.getElementById("toGarage"); if(tg) tg.onclick = () => { ui.result = null; go("#werkstatt", true); };
   document.getElementById("again").onclick = () => { const m = r.mix; ui.result = null; if(m) ui.mixIds = m; history.replaceState(null, "", m ? "#mix" : "#gruppe"); startSession(m); };
   document.getElementById("toGroup").onclick = () => { const m = r.mix; ui.result = null; if(m) ui.mixIds = m; go(m ? "#mix" : "#gruppe", true); };
   window.scrollTo(0,0);

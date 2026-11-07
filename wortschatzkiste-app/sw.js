@@ -1,6 +1,6 @@
 // Wortschatzkiste – speichert die App auf dem Handy, damit sie offline startet.
 // Bei einer neuen Version die Zahl hochzählen, dann holt sich das Handy das Update.
-const CACHE = "wortschatzkiste-v23";
+const CACHE = "wortschatzkiste-v27";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png"];
 
 self.addEventListener("install", e => {
