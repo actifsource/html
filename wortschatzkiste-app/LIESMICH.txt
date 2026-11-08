@@ -7,6 +7,9 @@ Inhalt
   sw.js                   sorgt dafür, dass die App offline startet
   icon-*.png              App-Symbole
   ocr/                    Texterkennung für Fotos (Englisch, Deutsch, Französisch)
+  verknuepfung.html       Für ältere Handys, auf denen die installierte App abstürzt:
+                          …/wortschatzkiste-app/verknuepfung.html in Chrome öffnen
+                          und den Schritten folgen.
 
 Selbst hinzufügen (optional)
   anleitung.mp4           Das Werbevideo für die Seite „So funktioniert’s“ (ℹ️).

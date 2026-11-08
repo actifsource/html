@@ -523,7 +523,7 @@ const MODES = [
   { key:"normal", icon:"🧠", name:"Im Kopf", short:"Im Kopf", bonus:0, desc:"Karte umdrehen und selbst sagen, ob du es wusstest." },
   { key:"letters", icon:"🔤", name:"Buchstaben", short:"Buchstaben", bonus:1, desc:"Die Buchstaben der Lösung in der richtigen Reihenfolge antippen. +1 Bonus-Stern." },
   { key:"tipp",   icon:"⌨️", name:"Tippen",  short:"Tippen",  bonus:2, desc:"Jede Übersetzung selbst eintippen. Groß- und Kleinschreibung zählt nicht. +2 Bonus-Sterne." },
-  { key:"profi",  icon:"🚀", name:"Profi",   short:"Profi",   bonus:3, desc:"Eintippen, Antippen, Frosch-Sprung, Wort-Gipfel und Wasser-Weg, bunt gemischt. +3 Bonus-Sterne." }
+  { key:"profi",  icon:"🚀", name:"Profi",   short:"Profi",   bonus:3, desc:"Eintippen, Buchstaben, Antippen, Frosch-Sprung, Wort-Gipfel und Wasser-Weg, bunt gemischt. +3 Bonus-Sterne." }
 ];
 function modeOf(k){ return MODES.find(m => m.key === k) || MODES[0]; }
 // Medaillen nach dem Durchschnitt des Lernstands (0 bis 5) aller Karten der Gruppe
@@ -642,7 +642,8 @@ function renderHome(){
   const lang = S.settings.lang || "en", L = langOf(lang);
   S.groups.forEach(g => { if(!g.grade){ g.grade = grade; changed = true; } if(!g.lang){ g.lang = "en"; changed = true; } });   // z. B. aus einer älteren Sicherung
   if(changed) save();
-  const groups = S.groups.filter(g => g.grade === grade && g.lang === lang).sort((a,b) => a.name.localeCompare(b.name, "de"));
+  // Zahlen im Namen werden als Zahlen sortiert: Unit 2 vor Unit 10
+  const groups = S.groups.filter(g => g.grade === grade && g.lang === lang).sort((a,b) => a.name.localeCompare(b.name, "de", { numeric: true, sensitivity: "base" }));
   const sel = ui.select;
   const selCards = sel ? S.words.filter(w => sel.has(w.groupId)).length : 0;
   app.innerHTML = banner() + `
@@ -1155,10 +1156,10 @@ function prepForOcr(file){
 // Erkannte Wörter in Spalten aufteilen. Gibt es drei Spalten (z. B. mit Lautschrift),
 // zählen nur die erste und die letzte.
 function ocrToPairs(data){
-  const lines = (data.lines || []).map(l => (l.words || []).filter(w => w.text && /[\p{L}]/u.test(w.text) && w.confidence > 25))
+  const lines = (data.lines || []).map(l => (l.words || []).filter(w => w.text && /[A-Za-zÀ-ÖØ-öø-ſ]/.test(w.text) && w.confidence > 25))
     .filter(ws => ws.length);
   if(!lines.length) return null;
-  const all = lines.flat();
+  const all = [].concat.apply([], lines);
   const minX = Math.min(...all.map(w => w.bbox.x0)), maxX = Math.max(...all.map(w => w.bbox.x1));
   const extent = Math.max(1, maxX - minX), BIN = 4, n = Math.ceil(extent / BIN) + 1;
   const cover = new Array(n).fill(0);
@@ -1825,6 +1826,7 @@ function distractors(w, dir, n){
 function chooseType(w, dir){
   const ans = answerOf(w, dir), letters = ans.replace(/\s/g, "");
   const ok = ["flip", "typing"];
+  if(stripParens(ans).replace(/\s/g, "").length >= 2) ok.push("letters");   // Buchstaben in der richtigen Reihenfolge antippen
   if(distractors(w, dir, 2).length >= 2){ ok.push("choice", "frog", "climb", "pipes"); }
   const s = ui.session;
   const pick = ok.filter(t => t !== s.lastType);
@@ -1835,12 +1837,17 @@ function chooseType(w, dir){
 // bei „groß, hoch“ oder „groß / hoch“ zählt auch eine Variante.
 function simple(t){ return t.toLowerCase().replace(/[’`]/g, "'").replace(/[.!?]+$/,"").replace(/\s+/g," ").trim().replace(/^to /, ""); }
 function deaccent(t){ return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/œ/g, "oe").replace(/æ/g, "ae"); }
+// Was in Klammern steht, z. B. „(sich) freuen“ oder „to look (at)“, muss nicht getippt werden
+function stripParens(t){ return String(t).replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim(); }
 function isCorrect(input, answer, loose){
-  const a = simple(input);
+  const a = simple(stripParens(input));
   if(!a) return false;
   const same = (x, y) => x === y || (loose && deaccent(x) === deaccent(y));
-  if(same(a, simple(answer))) return true;
-  return answer.split(/\s*[,/;]\s*/).some(part => part && same(simple(part), a));
+  // gilt ohne den Klammer-Teil und auch mit ihm (dann ohne die Klammern selbst)
+  return [stripParens(answer), answer.replace(/[()]/g, "")].some(ans => {
+    if(same(a, simple(ans))) return true;
+    return ans.split(/\s*[,/;]\s*/).some(part => part && same(simple(part), a));
+  });
 }
 
 function renderLearn(entering){
@@ -2036,12 +2043,12 @@ function renderChallenge(head, w){
           const ok = built.toLowerCase() === st.letters.join("").toLowerCase();
           drawScramble();
           document.getElementById("slots").classList.add(ok ? "ok" : "no");
-          task.querySelector(".answers")?.remove();
+          { const a = task.querySelector(".answers"); if(a) a.remove(); }
           done(ok);
         } else drawScramble();
       });
       const undo = document.getElementById("undo"); if(undo) undo.onclick = () => { st.picked.pop(); drawScramble(); };
-      const dn = document.getElementById("dunno"); if(dn) dn.onclick = () => { task.querySelector(".answers")?.remove(); done(false); };
+      const dn = document.getElementById("dunno"); if(dn) dn.onclick = () => { { const a = task.querySelector(".answers"); if(a) a.remove(); } done(false); };
     };
     drawScramble();
   }
@@ -2107,7 +2114,7 @@ function makeState(type, w, dir){
   if(type === "climb") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
   if(type === "frog") return { options: shuffle([ans, ...distractors(w, dir, 2)]) };
   if(type === "letters"){
-    const target = [...ans];
+    const target = [...(stripParens(ans) || ans)];   // Klammer-Teil wird nicht gelegt
     const letters = target.filter(c => c !== " ").map(c => c.toLowerCase());
     let tiles = shuffle(letters), n = 0;
     while(letters.length > 1 && tiles.join("") === letters.join("") && n++ < 10) tiles = shuffle(letters);
@@ -2468,7 +2475,7 @@ function renderPreview(){
     <section class="panel" style="padding:12px">
       <div class="phead"><span></span><span>${L.flag} ${L.name}</span><span>🇩🇪 Deutsch</span><span></span></div>
       ${Array.from({ length: rows }, (_, i) => {
-        const en = p.en[i] ?? "", de = p.de[i] ?? "";
+        const en = p.en[i] != null ? p.en[i] : "", de = p.de[i] != null ? p.de[i] : "";
         const dupe = en && existing.has(en.trim().toLowerCase());
         return `<div class="prow ${dupe ? "dupe" : ""}">
           <span class="pn">${i + 1}</span>

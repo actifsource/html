@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#163a30">
+<title>Wortschatzkiste</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+// Wurde die Verknüpfung schon erstellt, geht es direkt weiter zur App
+try{
+  if(localStorage.getItem("wsk-verknuepfung") === "1" && location.search.indexOf("einrichten") < 0){ location.replace("./"); }
+}catch(e){}
+</script>
+<style>
+  :root{ --bg:#E3F0E9; --ink:#15302A; --muted:#4F6B62; --accent:#FFC83D; --good:#1F8F5C }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:18px/1.45 "Trebuchet MS", system-ui, sans-serif }
+  main{ max-width:520px; margin:0 auto; padding:24px 18px 40px }
+  h1{ font-size:1.7rem; margin:.2em 0 .3em }
+  .box{ background:#fff; border-radius:18px; padding:16px 18px; margin:16px 0; box-shadow:0 2px 0 rgba(21,48,42,.18) }
+  ol{ margin:0; padding-left:1.3em } li{ margin:8px 0 }
+  .btn{ display:block; width:100%; box-sizing:border-box; border:0; border-radius:16px; padding:16px; font:inherit; font-weight:700; font-size:1.1rem; text-align:center; text-decoration:none; margin-top:10px }
+  .yellow{ background:var(--accent); color:#3A2A00 } .ghost{ background:transparent; border:2px solid #C4DACF; color:var(--ink) }
+  .muted{ color:var(--muted); font-size:.95rem }
+</style>
+</head>
+<body>
+<main>
+  <div style="font-size:2.6rem">🗃️</div>
+  <h1>Wortschatzkiste als Verknüpfung</h1>
+  <p class="muted">Für Handys, auf denen die installierte App beim Öffnen abstürzt. Die Verknüpfung öffnet die Wortschatzkiste direkt in Chrome.</p>
+  <div class="box">
+    <ol>
+      <li>Oben rechts in Chrome auf <b>⋮</b> tippen.</li>
+      <li><b>„Zum Startbildschirm hinzufügen“</b> wählen und bestätigen.</li>
+      <li>Danach hier unten auf <b>„Fertig“</b> tippen.</li>
+    </ol>
+  </div>
+  <button class="btn yellow" id="done">✓ Fertig, Verknüpfung ist erstellt</button>
+  <a class="btn ghost" href="./">Wortschatzkiste ohne Verknüpfung öffnen</a>
+  <p class="muted" style="margin-top:18px">Ab jetzt öffnet das neue Symbol auf dem Startbildschirm die Wortschatzkiste automatisch. Die alte, abstürzende App vorher lange drücken und deinstallieren. Die Gruppen bleiben erhalten, weil sie in Chrome gespeichert sind.</p>
+</main>
+<script>
+document.getElementById("done").onclick = function(){
+  try{ localStorage.setItem("wsk-verknuepfung", "1"); }catch(e){}
+  location.replace("./");
+};
+</script>
+</body>
+</html>
