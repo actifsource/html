@@ -1914,7 +1914,7 @@ function renderFlip(head, w, stack, entering){
   function flip(){
     if(s.flipped) return;
     s.flipped = true; card.classList.add("flipped"); showControls();
-    speakAnswer(w, s.dir);
+    if(!askEn) speakAnswer(w, s.dir);   // DE → EN: das englische Wort wird erst jetzt sichtbar
   }
   card.onclick = e => { if(e.target.closest(".speak")) return; flip(); };
   card.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); } };
@@ -1924,6 +1924,8 @@ function renderFlip(head, w, stack, entering){
     toggleSpeak(() => speakWord(w));
   });
   showControls();
+  // EN → DE: das englische Wort ist sofort sichtbar, also gleich vorlesen
+  if(askEn && !s.flipped) setTimeout(() => { if(document.body.contains(card)) speakAnswer(w, s.dir); }, 250);
 }
 
 /* Gemeinsamer Rahmen für Eintippen, Auswahl, Buchstabensalat und Frosch-Sprung */
@@ -1943,6 +1945,7 @@ function renderChallenge(head, w){
   // Lautsprecher: schaltet das automatische Vorlesen aus und ein; beim Einschalten wird sofort vorgelesen
   const say = document.getElementById("say");
   if(say) say.onclick = () => toggleSpeak(() => speakWord(w));
+  if(askEn && !st.finished) setTimeout(() => { if(document.body.contains(task)) speakAnswer(w, s.dir); }, 250);
   const task = document.getElementById("task"), fb = document.getElementById("feedback");
   // Kurze Sperre nach dem Kartenwechsel, damit ein Tipp auf „Weiter“ nicht auf der nächsten Karte landet
   app.classList.add("tap-guard");
@@ -1952,7 +1955,7 @@ function renderChallenge(head, w){
   function done(right, given){
     if(st.finished) return;
     st.finished = true;
-    speakAnswer(w, s.dir);
+    if(!askEn) speakAnswer(w, s.dir);
     if(right){
       fb.innerHTML = `<button class="verdict good verdict-btn" id="goOn">✓ Richtig!${given && simple(given) !== simple(ans) ? ` Ganz genau: <strong>${esc(ans)}</strong>` : ""} <span class="verdict-next">Weiter ▶</span></button>`;
       let advanced = false;
@@ -2018,7 +2021,7 @@ function renderChallenge(head, w){
             else {
               st.finished = true; draw();
               document.getElementById("slots").classList.add("ok");
-              speakAnswer(w, s.dir);
+              if(s.dir !== "ende") speakAnswer(w, s.dir);
               fb.innerHTML = `<div class="verdict bad">✓ Geschafft, aber mit ${st.errors === 1 ? "einem Fehler" : st.errors + " Fehlern"}. Die Karte kommt bald wieder.</div>
                 <button class="btn" id="goOn">Weiter</button>`;
               document.getElementById("goOn").onclick = () => answer(false);
