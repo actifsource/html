@@ -171,6 +171,8 @@ body{overflow-x:hidden}
 .g-item:not(.owned) .g-price{color:var(--chalk-ink); background:var(--chalk); border-radius:999px; padding:1px 8px}
 .g-item.on .g-price{color:var(--good)}
 
+.speak.off{opacity:.55; filter:grayscale(1)}
+
 /* Konfetti */
 canvas.confetti{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:50}
 
@@ -1884,13 +1886,13 @@ function renderFlip(head, w, stack, entering){
         <div class="card ${s.flipped ? "flipped" : ""}" id="card" role="button" tabindex="0" aria-label="Karte umdrehen">
           <div class="face front paper">
             <div class="lang">${frontLang}</div>
-            ${askEn ? '<button class="speak" aria-label="Vorlesen">🔊</button>' : ""}
+            ${askEn ? speakBtn() : ""}
             <div class="word">${esc(front)}</div>
             <div class="hint">${again ? "Die kennst du schon von vorhin! Tippe zum Umdrehen." : "Weißt du es? Tippe auf die Karte zum Umdrehen."}</div>
           </div>
           <div class="face back paper">
             <div class="lang">${backLang}</div>
-            ${!askEn ? '<button class="speak" aria-label="Vorlesen">🔊</button>' : ""}
+            ${askEn ? "" : speakBtn()}
             <div class="word">${esc(back)}</div>
             <div class="hint">${esc(front)}</div>
           </div>
@@ -1912,11 +1914,15 @@ function renderFlip(head, w, stack, entering){
   function flip(){
     if(s.flipped) return;
     s.flipped = true; card.classList.add("flipped"); showControls();
-    if(!askEn) speakWord(w);
+    speakAnswer(w, s.dir);
   }
   card.onclick = e => { if(e.target.closest(".speak")) return; flip(); };
   card.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); } };
-  app.querySelectorAll(".speak").forEach(b => b.onclick = e => { e.stopPropagation(); speakWord(w); });
+  app.querySelectorAll(".speak").forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    // Vorgelesen wird immer nur das Wort in der Fremdsprache
+    toggleSpeak(() => speakWord(w));
+  });
   showControls();
 }
 
@@ -1928,13 +1934,15 @@ function renderChallenge(head, w){
   app.innerHTML = head + `
     <div class="mini-card paper ${s.type === "climb" || s.type === "pipes" ? "compact" : ""}">
       <div class="lang">${askEn ? wordLang(w).flag + " " + wordLang(w).name : "🇩🇪 Deutsch"} <span class="muted" style="font-weight:600">→ ${askEn ? "🇩🇪 Deutsch" : wordLang(w).flag + " " + wordLang(w).name}</span></div>
-      ${askEn ? '<button class="speak" id="say" aria-label="Vorlesen">🔊</button>' : ""}
+      ${askEn ? speakBtn("say") : ""}
       <div class="word">${esc(prompt)}</div>
     </div>
     <div id="task"></div>
     <div id="feedback" aria-live="polite"></div>
   `;
-  const say = document.getElementById("say"); if(say) say.onclick = () => speakWord(w);
+  // Lautsprecher: schaltet das automatische Vorlesen aus und ein; beim Einschalten wird sofort vorgelesen
+  const say = document.getElementById("say");
+  if(say) say.onclick = () => toggleSpeak(() => speakWord(w));
   const task = document.getElementById("task"), fb = document.getElementById("feedback");
   // Kurze Sperre nach dem Kartenwechsel, damit ein Tipp auf „Weiter“ nicht auf der nächsten Karte landet
   app.classList.add("tap-guard");
@@ -1944,7 +1952,7 @@ function renderChallenge(head, w){
   function done(right, given){
     if(st.finished) return;
     st.finished = true;
-    if(!askEn) speakWord(w);
+    speakAnswer(w, s.dir);
     if(right){
       fb.innerHTML = `<button class="verdict good verdict-btn" id="goOn">✓ Richtig!${given && simple(given) !== simple(ans) ? ` Ganz genau: <strong>${esc(ans)}</strong>` : ""} <span class="verdict-next">Weiter ▶</span></button>`;
       let advanced = false;
@@ -2010,7 +2018,7 @@ function renderChallenge(head, w){
             else {
               st.finished = true; draw();
               document.getElementById("slots").classList.add("ok");
-              if(s.dir !== "ende") speakWord(w);
+              speakAnswer(w, s.dir);
               fb.innerHTML = `<div class="verdict bad">✓ Geschafft, aber mit ${st.errors === 1 ? "einem Fehler" : st.errors + " Fehlern"}. Die Karte kommt bald wieder.</div>
                 <button class="btn" id="goOn">Weiter</button>`;
               document.getElementById("goOn").onclick = () => answer(false);
@@ -2290,6 +2298,27 @@ function cardMedal(l){
 }
 
 function speakWord(w){ speak(w.en, wordLang(w).speech); }
+function speakBtn(id){
+  const on = S.settings.autoSpeak !== false;
+  return `<button class="speak ${on ? "" : "off"}" ${id ? `id="${id}"` : ""} aria-pressed="${on}" aria-label="Automatisch vorlesen ${on ? "ausschalten" : "einschalten"}">${on ? "🔊" : "🔇"}</button>`;
+}
+function toggleSpeak(sayNow){
+  S.settings.autoSpeak = S.settings.autoSpeak === false;
+  save();
+  const on = S.settings.autoSpeak !== false;
+  document.querySelectorAll(".speak").forEach(b => {
+    b.textContent = on ? "🔊" : "🔇";
+    b.classList.toggle("off", !on);
+    b.setAttribute("aria-pressed", on);
+    b.setAttribute("aria-label", "Automatisch vorlesen " + (on ? "ausschalten" : "einschalten"));
+  });
+  if(on) sayNow(); else { try{ speechSynthesis.cancel(); }catch(_){} }
+}
+// Liest nach dem Aufdecken automatisch das Wort in der Fremdsprache vor (Englisch/Französisch, nie Deutsch; abschaltbar)
+function speakAnswer(w, dir){
+  if(S.settings.autoSpeak === false) return;
+  speakWord(w);
+}
 function speak(text, voice){
   try{
     if(!("speechSynthesis" in window)) return;
