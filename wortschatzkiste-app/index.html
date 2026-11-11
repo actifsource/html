@@ -672,7 +672,7 @@ function renderHome(){
       return `<div class="swipe-wrap"><div class="swipe-bg" aria-hidden="true">${sel && sel.size >= 2 ? "🔀 Mix ▶" : "Öffnen ▶"}</div><button class="group-row ${on ? "selected" : ""} ${sel && !ws.length ? "disabled" : ""}" data-open="${esc(g.id)}" data-count="${ws.length}" ${sel ? `aria-pressed="${!!on}"` : ""}>
         <span class="row-head">${sel ? `<span class="sel-mark" aria-hidden="true">${on ? "✓" : ""}</span>` : ""}<span class="name">${esc(g.name)}</span>
           <span class="row-awards">${MEDALS.map(m => ws.length && m.test(ws, bestLevel) ? `<span title="${m.name}">${m.icon}</span>` : `<span class="award-off" title="${m.name} noch nicht erreicht">${m.icon}</span>`).join("")}</span></span>
-        <span class="meta">${plural(ws.length, "Karte", "Karten")}${ws.length ? `, ${sure} ${sure === 1 ? "sitzt" : "sitzen"}` : ""}</span>
+        <span class="meta">${plural(ws.length, "Karte", "Karten")}${ws.length ? `, ${sure} ${sure === 1 ? "sitzt" : "sitzen"}, ${plural(g.rounds || 0, "Durchgang", "Durchgänge")}` : ""}</span>
         <div class="boxbar" aria-hidden="true"><span style="width:${ws.length ? sure/ws.length*100 : 0}%"></span></div>
       </button></div>`;}).join("")}</div>`
     : `<div class="empty"><p><strong>Noch keine ${L.name}-Gruppe in der ${grade}. Klasse.</strong></p><p class="muted">Tippe oben rechts auf ➕ und leg die erste an, zum Beispiel ${lang === "fr" ? "„Unité 1 – Les couleurs“" : "„Unit 1 – Colours“"}.</p></div>`}
@@ -2209,6 +2209,7 @@ function finish(){
   groupsIn.forEach((g, i) => {
     const before = trophies(g);
     g.stars = (g.stars || 0) + shares[i];
+    g.rounds = (g.rounds || 0) + 1;   // ein kompletter Durchgang durch alle Karten der Gruppe
     checkMedals(g).forEach(m => medals.push(Object.assign({ group: g.name }, m)));
     if(trophies(g) > before) newTrophy = { name: g.name, stars: g.stars };
   });
